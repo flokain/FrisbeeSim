@@ -160,6 +160,7 @@ public class UltimateWithUI extends GUIState
 		display2DFrame.setTitle("Field");
 		display2DFrame.setSize(1000,500);
 		display2D.setScale(10);
+		
 		// attach the portrayals
 		// specify the backdrop color  -- what gets painted behind the displays
 		display2D.setBackdrop(new Color(50,140,50));  // a dark green

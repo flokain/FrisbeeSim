@@ -1,12 +1,7 @@
 package Ultimate;
 
-import java.awt.Color;
-
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
-
-import com.sun.org.apache.xerces.internal.impl.xpath.XPath.Step;
-import com.sun.scenario.effect.InvertMask;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
@@ -22,7 +17,7 @@ public class Frisbee extends UltimateEntity implements Steppable
 	Matrix3d rotation; //phi,theta,gamma
 	double alpha;
 	
-	//Simulation Parameter
+	//Simulation Parameters
 	private double g;  		//The acceleration of gravity (m/s^2).
 	private double RHO; 		//The density of air in kg/m^3.
 	private double AREA;	//The area of a standard frisbee.
@@ -40,7 +35,6 @@ public class Frisbee extends UltimateEntity implements Steppable
 	private double Ixy;
 	private double Iz;
 	
-	
 	public Frisbee(Double2D posi)	
 	{
 		//		double radius = 0.155; 	//radius of an ultrastar disc ?
@@ -53,7 +47,7 @@ public class Frisbee extends UltimateEntity implements Steppable
 	}	
 	public Frisbee(Vector3d posi, Vector3d velocity) 
 	{
-		super( posi,velocity,new Vector3d(), 0.175, 0.2735);
+		super( posi,velocity,new Vector3d(), 0.175, 0.134698416889272);
 		
 		rotForce = new Vector3d();
 		rotAccel = new Vector3d();
@@ -65,7 +59,7 @@ public class Frisbee extends UltimateEntity implements Steppable
 		g = -9.7935; 	
 	    RHO = 1.23;	
 		AREA = Math.pow(radius,2)* Math.PI;	
-		CL0 = 0.133;	
+		CL0 = 0.3331;	
 		CLA = 1.9124;
 		CD0 = 0.1769;
 		CDA = 0.685;	
@@ -73,19 +67,21 @@ public class Frisbee extends UltimateEntity implements Steppable
 		CRr = 0.00171;
 		CMO = -0.0821;
 		CMa = 0.4338;
+		/* short flights*/
 		CMq = -0.005;
 		CRp = -0.0055;
 		CNr = -0.0000071;
-		/* long flights:
-		CMq = -0.0144; 
-		CRp = -0.0125;
-		CNr = -0.0000341;
-		*/
+		/* long flights: */
+//		CMq = -0.0144; 
+//		CRp = -0.0125;
+//		CNr = -0.0000341;
+	
 		Ixy = 0.001219;
 		Iz = 0.002352;
 		
 	}
 	
+	@Override
 	public void step(final SimState state)
 	{   
 		force = calcForces();
@@ -96,27 +92,6 @@ public class Frisbee extends UltimateEntity implements Steppable
 		stepRotation(state); //apply rotation
 		
 	}
-
-//	public void step(final SimState state)
-//	{   
-//		flightForces2();
-//		Ultimate ultimate = (Ultimate)state;
-//		rotAccel.scale(ultimate.stepTime); // one step is a thousand of a second
-//		anglesd.add(rotAccel);
-//		Vector3d tmp_anglesd = new Vector3d(anglesd);
-//		tmp_anglesd.scale(ultimate.stepTime);
-//		
-//		angles.add(tmp_anglesd);
-//
-//		super.step(state); // this will change the velocity vector. therefore we need to reorientate the discs y an x axis afterwards
-//		rotation.rotY(Math.PI); 
-//		rotate(rotation, -angles.x, o);
-//		rotate(rotation, -angles.y, 1);
-//		rotate(rotation, -angles.z, 2);	
-//		
-//		ultimate.space.setObjectLocation(this,new Double3D(location.x,location.y,location.z));
-//		
-//	}
 	
 	public void throwDisc(Vector3d vel,Vector3d angles, Vector3d anglesVelocity)
 	{
@@ -136,13 +111,16 @@ public class Frisbee extends UltimateEntity implements Steppable
 		Vector3d tmpZ = new Vector3d();
 		tmpZ.cross(tmpX, tmpY);
 		// initial orientation of the disc
+		
 		rotation.setColumn(0, tmpX);	// x' points in velocity direction,
 		rotation.setColumn(1, tmpY);	// y' is perpendicular to the velocity-z plane
 		rotation.setColumn(2, tmpZ);	// z' is perpendicular to the x'-y' plane pointing "up";
-
 		// add inital rotations to the disc plane
+		
+		rotation.setIdentity();
 		rotate(rotation, angles.x, 0);
 		rotate(rotation, angles.y, 1); // deines alpha at the beginning of the flight
+		orientateDisc();
 	}
 	public void flightForces() {
 			
@@ -323,7 +301,7 @@ public class Frisbee extends UltimateEntity implements Steppable
 		
 	// The angle of attack
 		
-		double alpha = x.angle(vel);
+		double alpha = -vel.angle(x);
 		// we need to know which of the vector is pointing more in z direction 
 		// we project to the z-velocity plane. it is defined by the cross product of z and the velocity vector
 		Vector3d plane = new Vector3d();
@@ -337,7 +315,7 @@ public class Frisbee extends UltimateEntity implements Steppable
 				
 		// now we need to fin out if the disc is pointing lower than the velocity vector.
 		// if x is pointing in negative velocity direction meaning that the dis is flipped
-		// it will be handled as if it was not flipt meaning that x is set as -x.
+		// it will be handled as if it was not fliped meaning that x is set as -x.
 		if ( x.dot(vel) <=0 ) x.scale(-1);
 		
 		// now we just look for the closer angle to z. if vel is closer, alpha is negative.
@@ -397,14 +375,7 @@ public class Frisbee extends UltimateEntity implements Steppable
 		
 		// drag is quadratic in angles [-pi/2 +ALPHA0, pi/2+ALPHA0] and Pi periodic meaning f(y+k*pi -pi/2) = f(y) 
 		double drag;
-		if( Math.abs(alpha-ALPHA0) > Math.PI/2)
-		{
-			drag = (CD0 + CDA*Math.pow((alpha-ALPHA0-Math.PI),2))*airRes;
-		}
-		else
-		{
-			drag = (CD0 + CDA*Math.pow((alpha-ALPHA0),2))*airRes;
-		}
+		drag = (CD0 + CDA*Math.pow((alpha-ALPHA0),2))*airRes;
 		dragVec.scale(drag);
 		force.add(dragVec); // drag is in negative direction of the velocity vector
 		
@@ -438,26 +409,36 @@ public class Frisbee extends UltimateEntity implements Steppable
 		// the equation Momenti (HUMMEL p.33) M = I*a + omega x I*omega
 		// and therefore I^(-1) * (M- omega x I*omega) = a
 		
+		Vector3d omega = new Vector3d (Math.cos(angles.y)*rotVelocity.x,rotVelocity.y,Math.sin(angles.y)*rotVelocity.x + rotVelocity.z);
+		Vector3d omegaF = new Vector3d (Math.cos(angles.y)*rotVelocity.x,rotVelocity.y,Math.sin(angles.y)*rotVelocity.x);
+		
 		Matrix3d interia = new Matrix3d();
 		interia.setM00(Ixy);
 		interia.setM11(Ixy);
 		interia.setM22(Iz);
 		
-		// tmpCross := omega x I*omega
-		Vector3d tmpCross = new Vector3d(rotVelocity);
-		interia.transform(tmpCross);
-		tmpCross.cross(rotVelocity, tmpCross);
+		// tmpCross := omegaF x I*omega :precission
+		Vector3d precission = new Vector3d();
+		interia.transform(omega); // I*omega
+		precission.cross(omegaF, omega); //omegaF x I*omega
 		
 		// set a to M
-		angAccel = new Vector3d(roll,pitch,spin);
+		rotAccel = new Vector3d(roll,pitch,spin);
 		
-		// set a to M - omega x I*omega
-		angAccel.sub(tmpCross);
+		// set a to M - omegaF x I*omega
+		rotAccel.sub(precission); //M - omegaF x I*omega
 		
-		// set a to I^(-1) (M - omega x I*omega)
+		// set a to I^(-1) (M - omegaF x I*omega)
 		interia.invert();
-		interia.transform(angAccel);
-		return angAccel;
+		interia.transform(rotAccel);
+		
+		// since [Hummel, p.34] a = omega', a = phi'' cos(theta) -phi' sin(theta), theta'',  - phi'' sin(theta) + phi' cos(theta)*theta' +gamma''
+		// we have to transform the coordinates to get (Phi'',theta'',gamma'')
+		
+		rotAccel.x = (rotAccel.x + rotVelocity.x * Math.sin(angles.y))/Math.cos(angles.y);  // phi'' = (a[1] + phi' sin(theta))/cos(theta), since   a[1] = phi'' cos(theta) -phi' sin(theta)
+		rotAccel.z = rotAccel.z - rotVelocity.x * Math.cos(angles.y)*rotVelocity.y - rotAccel.x * Math.sin(angles.y);  // gamma'' = (a[3] - phi' cos(theta)- phi'' sin(theta)*theta', since   a[1] = phi'' cos(theta) -phi' sin(theta)
+		
+		return rotAccel;
 	}
 	
 	private void stepRotation(SimState state)
@@ -473,7 +454,7 @@ public class Frisbee extends UltimateEntity implements Steppable
 		deltaRotation.setIdentity();
 		rotate(deltaRotation, deltaRotVelocity.x, 0); //apply x rotation
 		rotate(deltaRotation, deltaRotVelocity.y, 1); // apply y rotation
-		rotate(deltaRotation, deltaRotVelocity.z, 2); // apply y rotation
+		rotate(deltaRotation, deltaRotVelocity.z, 2); // apply z rotation
 
 		rotation.mul(deltaRotation);		// // rotate by delta rotation 	
 		
@@ -603,51 +584,28 @@ public class Frisbee extends UltimateEntity implements Steppable
 		rotAccel.z = (M.z - Ia*(rotAccel.x*st + thd*fd*ct))/Ia;
 	}
 
-	private Matrix3d orientateDisc()
+	private void orientateDisc()
 	{
 		//  the x coordinate of the disc is always the of the projected velocity vector therefore rotation must be adjusted each step after forces have been applied.
 		//	also the rotVelocity vector changes because the local coordinates of the disc change. We can get the rotation by solving the following equation:
 		//  rotation_old * orientation = rotation_old^(-1) * rotation_new. 
 		//TODO 
 		//Since orientation is a rotation around the local z axis of the disc this may be simplified to beta = arccos( rotation_old.col1 * rotation_new.col1).
-		Vector3d rollVec_old =  new Vector3d(rotation.m00,rotation.m10,rotation.m20); // we will need it later to reconstruct the rotation from the old frame to the new one
-		Vector3d pitchVec_old =  new Vector3d(rotation.m01,rotation.m11,rotation.m21); //
-		// 1 z' = spinVector = normal vector to frisbee plane;
 		Vector3d spinVec = new Vector3d(rotation.m02,rotation.m12,rotation.m22);
-		Vector3d vel  = new Vector3d(velocity.x, velocity.y, velocity.z);
 		
-		// 2 y' = pitchVector = normalized crossproduct of velocity and z'
-		Vector3d pitchVec = new Vector3d();
-		pitchVec.cross(spinVec,vel);
-		pitchVec.normalize();
-		
-		
-		// 3. x' = rollVector = z' x y'
-		Vector3d rollVec =  new Vector3d();
-		rollVec.cross(pitchVec,spinVec);
+		// 1 rollvec is the projection of velocity to the frisbee plane
+		Vector3d rollVec  = projection(velocity, spinVec);
 		rollVec.normalize();
 		
-	
-		// 4. beta = arccos( rotation_old.col1 * rotation_new.col1).
-		double tmp = rollVec_old.dot(rollVec)-.00000000000002;
-		double beta = Math.acos(tmp); // but we dont know the signum of beta
-		tmp = rollVec_old.dot(pitchVec)-.00000000000002;
-		double beta2 = Math.asin(tmp);
-		beta = -Math.signum(beta2)*beta;
+		// 2 pitchVec is perpedicular to spin rollvec 
+		Vector3d pitchVec = new Vector3d();
+		pitchVec.cross(spinVec,rollVec);
+		pitchVec.normalize();
+				
+		// 3. spin stays the same
 		
-		Matrix3d rotation_local = new Matrix3d(rotation);
-		rotation_local.rotZ(beta); // sets the 
-//		
-//		Matrix3d rotation_new = new Matrix3d(rotation);		
-//		rotation_new.setColumn(0, rollVec);
-//		rotation_new.setColumn(1, pitchVec);
-//		
-//		Matrix3d rotation_delta = new Matrix3d(rotation_old);
-//		rotation_delta.transpose(); // = invert for rotation matrizes (they are ONB)
-//		rotation_delta.mul(rotation_new);
-		
-		return rotation_local;
-		
+		rotation.setColumn(0, rollVec);
+		rotation.setColumn(1, pitchVec);		
 	}
 	private void rotate(Matrix3d mat,double angle,int axis) 
 	{
