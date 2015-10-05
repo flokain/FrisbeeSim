@@ -1,5 +1,7 @@
 package Ultimate;
 
+import java.io.IOException;
+
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
@@ -47,6 +49,10 @@ public class Frisbee extends UltimateEntity implements Steppable
 	}	
 	public Frisbee(Vector3d posi, Vector3d velocity) 
 	{
+		this(posi,velocity,0);
+	}
+	public Frisbee(Vector3d posi, Vector3d velocity, int Coeff) 
+	{
 		super( posi,velocity,new Vector3d(), 0.175, 0.134698416889272);
 		
 		rotForce = new Vector3d();
@@ -67,18 +73,22 @@ public class Frisbee extends UltimateEntity implements Steppable
 		CRr = 0.00171;
 		CMO = -0.0821;
 		CMa = 0.4338;
-		/* short flights*/
-		CMq = -0.005;
-		CRp = -0.0055;
-		CNr = -0.0000071;
-		/* long flights: */
-//		CMq = -0.0144; 
-//		CRp = -0.0125;
-//		CNr = -0.0000341;
-	
 		Ixy = 0.001219;
 		Iz = 0.002352;
-		
+		switch (Coeff){
+			case 0:
+				/* short flights*/
+				CMq = -0.005;
+				CRp = -0.0055;
+				CNr = -0.0000071;
+				break;
+			case 1:
+				/* long flights: */
+				CMq = -0.0144; 
+				CRp = -0.0125;
+				CNr = -0.0000341;
+				break;
+		}
 	}
 
 	// set the initial conditions for a throw.
@@ -256,7 +266,7 @@ public class Frisbee extends UltimateEntity implements Steppable
 		
 		Ultimate ultimate = (Ultimate) state;
 		
-		flightForces();
+		//flightForces();
 		super.step(state); //apply force
 		stepRotation(ultimate); //apply rotation
 		ultimate.space.setObjectLocation(this,new Double3D(location.x,location.y,location.z));
