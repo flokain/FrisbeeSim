@@ -1,4 +1,4 @@
-package Ultimate;
+package visualization;
 
 import java.awt.Color;
 import java.awt.Image;
@@ -7,6 +7,8 @@ import javax.media.j3d.Appearance;
 import javax.media.j3d.Group;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
+
+import Ultimate.Frisbee;
 
 import com.sun.j3d.loaders.Scene;
 import com.sun.j3d.loaders.objectfile.ObjectFile;
@@ -101,7 +103,7 @@ public class FrisbeePortrayal3D extends PrimitivePortrayal3D
 			}
 		}
 		   	
-		   	prev.setTransform(new Transform3D(frisbee.rotation, frisbee.location,1));
+		prev.setTransform(new Transform3D(frisbee.getRotation(), frisbee.getLocation(),3));
 		return prev;
 	}
     protected int numShapes() { return 1; }

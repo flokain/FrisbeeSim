@@ -13,8 +13,8 @@ import sim.util.MutableDouble2D;
 import sim.engine.*;
 
 public class Ultimate extends SimState{
-	Continuous2D ultimateField;
-	public Continuous3D space;
+	Continuous2D ultimateField2D;
+	public Continuous3D ultimateField3D;
 	double fieldWidth = 37.0; // size of an ultimate field in meters
 	double fieldLength = 100.0; 
 	double endzoneLength = 16.0;
@@ -58,15 +58,15 @@ public class Ultimate extends SimState{
 	{
 		super.start();
 		//init field;
-		ultimateField = new Continuous2D(0.1, fieldLength,fieldWidth);
-		space = new Continuous3D(0.001, fieldLength, fieldWidth, 40);
+		ultimateField2D = new Continuous2D(0.1, fieldLength,fieldWidth);
+		ultimateField3D = new Continuous3D(0.001, fieldLength, fieldWidth, 40);
 		ArrayList<FieldObject> lines = new ArrayList<FieldObject>(2);
 		lines.add(new FieldObject(endzoneLength,0,0,fieldWidth));
 		lines.add(new FieldObject(fieldLength - endzoneLength,0,0,fieldWidth));
 		
 		for ( int i = 0; i <lines.size();i++)
 		{
-			ultimateField.setObjectLocation(lines.get(i), lines.get(i).posi);
+			ultimateField2D.setObjectLocation(lines.get(i), lines.get(i).posi);
 		}
 		
 		String setup = "vertical";
@@ -80,13 +80,13 @@ public class Ultimate extends SimState{
 			for ( int i = 0; i <positionsOffence.size(); i++)
 			{
 				offence.add(new PlayerOffence((Double2D) positionsOffence.get(i)));
-				ultimateField.setObjectLocation(offence.get(i),(Double2D)positionsOffence.get(i));
+				ultimateField2D.setObjectLocation(offence.get(i),(Double2D)positionsOffence.get(i));
 				schedule.scheduleRepeating(offence.get(i));
 			}
 			for ( int i = 0; i <positionsDefence.size(); i++)
 			{
 				defence.add(new PlayerDefence((Double2D) positionsDefence.get(i)));
-				ultimateField.setObjectLocation(defence.get(i),(Double2D)positionsDefence.get(i));
+				ultimateField2D.setObjectLocation(defence.get(i),(Double2D)positionsDefence.get(i));
 				schedule.scheduleRepeating(defence.get(i));
 			}
 			Frisbee frisbee = new Frisbee(positionDisc);
@@ -101,24 +101,24 @@ public class Ultimate extends SimState{
 //			Vector3d angles = new Vector3d(-0.07,0.21,5.03);
 //			Vector3d angleVelocity = new Vector3d(-14.94,-1.48,54.25);
 			frisbee.throwDisc(velocity, angles, angleVelocity);
-			ultimateField.setObjectLocation(frisbee, new Double2D(frisbee.location.x,frisbee.location.y));
+			ultimateField2D.setObjectLocation(frisbee, new Double2D(frisbee.location.x,frisbee.location.y));
 			break;
 //			
 			case "throw":
 ////			Double2D posiP = new Double2D((endzoneLength+(fieldLength-endzoneLength)/7 ), fieldWidth/2);
-////			ultimateField.setObjectLocation(new PlayerOffence(posiP),posiP);
+////			ultimateField2D.setObjectLocation(new PlayerOffence(posiP),posiP);
 //			Vector3d posiF = new Vector3d((endzoneLength+(fieldLength-endzoneLength)/7), fieldWidth/3,0);
 //			Vector3d speedF = new Vector3d(14,0,0);
 //			double angleOfAttack = 2;
 //			
 //			//frisbee = new Frisbee(posiF,speedF,angleOfAttack);
-//			ultimateField.setObjectLocation(frisbee,new Double2D(posiF.x,posiF.y));
+//			ultimateField2D.setObjectLocation(frisbee,new Double2D(posiF.x,posiF.y));
 //			schedule.scheduleRepeating(frisbee);
 		}
 
 
 		//		for ( int i = 0; i < positionsDefence.size();i++)
-		//			ultimateField.setObjectLocation(new PlayerDefence(), (Double2D)(positionsDefence.get(i)));
+		//			ultimateField2D.setObjectLocation(new PlayerDefence(), (Double2D)(positionsDefence.get(i)));
 	}
 
 	public static void main(String[] args)

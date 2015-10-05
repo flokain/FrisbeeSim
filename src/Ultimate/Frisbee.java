@@ -17,7 +17,8 @@ public class Frisbee extends UltimateEntity implements Steppable
 	Vector3d angles;
 	Vector3d anglesd;
 	Matrix3d rotation; //phi,theta,gamma
-	double alpha;
+
+	double 	alpha;
 	
 	//Simulation Parameters
 	private static double g;  		//The acceleration of gravity (m/s^2).
@@ -124,11 +125,13 @@ public class Frisbee extends UltimateEntity implements Steppable
 	}
 	
 	//Setter and Getter
-	public Vector3d getRotVelocity() 					{return rotVelocity;}
-	public void setRotVelocity(Vector3d rotVelocity) 	{this.rotVelocity = rotVelocity;}
-	public Vector3d getAngles()							{return angles;}
-	public void setAngles(Vector3d angles) 				{this.angles = angles;}
-	public double getAlpha() 							{return alpha;}
+	public Vector3d getRotVelocity() 					{ return rotVelocity;				}
+	public void setRotVelocity(Vector3d rotVelocity) 	{ this.rotVelocity = rotVelocity;	}
+	public Vector3d getAngles()							{ return angles;					}
+	public void setAngles(Vector3d angles) 				{ this.angles = angles;				}
+	public double getAlpha() 							{ return alpha;						}
+	public Matrix3d getRotation() 						{ return rotation;					}
+	public void setRotation(Matrix3d rotation) 			{ this.rotation = rotation;			}
 	
 	//Variable Calculations
 	private double calcAirRes()
@@ -156,7 +159,7 @@ public class Frisbee extends UltimateEntity implements Steppable
 		return alpha;
 	}
 	
-	private Vector3d calcForces(double alpha,double airRes, Vector3d velocity, Matrix3d rotation) 
+	private Vector3d calcForces( double alpha, double airRes, Vector3d velocity, Matrix3d rotation) 
 	{
 		Vector3d force = new Vector3d();
 		
@@ -202,7 +205,7 @@ public class Frisbee extends UltimateEntity implements Steppable
 		force.add(new Vector3d(0,0,mass*g));
 		return force;
 	}
-	private Vector3d calcAngularAccelaration(double alpha,double airRes,Vector3d angles, Vector3d rotVelocity)
+	private Vector3d calcAngularAccelaration( double alpha, double airRes, Vector3d angles, Vector3d rotVelocity)
 	{
 		
 		
@@ -254,7 +257,6 @@ public class Frisbee extends UltimateEntity implements Steppable
 		
 		return rotAccel;
 	}
-	
 	//Simulation stepper
 	@Override
 	public void step(final SimState state)
@@ -267,9 +269,10 @@ public class Frisbee extends UltimateEntity implements Steppable
 		Ultimate ultimate = (Ultimate) state;
 		
 		//flightForces();
-		super.step(state); //apply force
 		stepRotation(ultimate); //apply rotation
-		ultimate.space.setObjectLocation(this,new Double3D(location.x,location.y,location.z));
+		super.step(state); //apply force and set location in the enviroment
+		stepRotation(ultimate); //apply rotation
+		ultimate.ultimateField3D.setObjectLocation(this,new Double3D(location.x,location.y,location.z)); //set the location in 3d portrayal
 
 	}
 	private void stepRotation(Ultimate state)

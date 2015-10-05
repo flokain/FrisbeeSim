@@ -1,4 +1,4 @@
-package Ultimate;
+package visualization;
 
 import java.awt.Color;
 import java.awt.Image;

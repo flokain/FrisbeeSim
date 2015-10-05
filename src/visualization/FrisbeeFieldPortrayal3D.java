@@ -1,4 +1,4 @@
-package Ultimate;
+package visualization;
 
 import java.awt.Color;
 import java.awt.Image;
@@ -18,7 +18,7 @@ import sim.util.gui.SimpleColorMap;
 
 public class FrisbeeFieldPortrayal3D extends ValueGrid2DPortrayal3D {
 
-	FrisbeeFieldPortrayal3D()
+	public FrisbeeFieldPortrayal3D()
 	{
 		this("images\\artificial-grass-field-top-view-texture.jpg");
 	}
