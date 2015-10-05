@@ -21,9 +21,7 @@ public class Ultimate extends SimState{
 	double stepTime = 0.0001; // simulated time that elapses between 2 steps (all forces are calculated in m/s^2)
 	Bag positionsOffence;
 	Bag positionsDefence;
-	Double2D positionDisc;
-	Frisbee frisbee;
-	
+	Double3D positionDisc;
 
 	public Ultimate(long seed)
 	{		
@@ -38,14 +36,15 @@ public class Ultimate extends SimState{
 		//
 		for (int i = 0; i < 7; i++)
 			positionsDefence.add(new Double2D((endzoneLength+(fieldLength-endzoneLength)*(i)/7 ), fieldWidth/2+2));
-			frisbee = new Frisbee(new Double3D( ((Double2D)positionsOffence.get(0)).x,((Double2D)positionsOffence.get(0)).y,1));
+		
+		positionDisc = new Double3D( ((Double2D)positionsOffence.get(0)).x+1,((Double2D)positionsOffence.get(0)).y+1,1);
+		
 	}
 
 	public Ultimate(long seed, Bag posiOffence)
 	{
 		super(seed);
 		positionsOffence = posiOffence;
-		frisbee = new Frisbee((Double2D)positionsOffence.get(0));
 	}
 
 	public Ultimate(long seed, Bag posiOffence, Bag posiDefence)
@@ -53,7 +52,6 @@ public class Ultimate extends SimState{
 		super(seed);
 		positionsOffence = posiOffence;
 		positionsDefence = posiDefence;
-		frisbee = new Frisbee((Double2D)positionsOffence.get(0));
 	}
 
 	public void start()
@@ -91,18 +89,19 @@ public class Ultimate extends SimState{
 				ultimateField.setObjectLocation(defence.get(i),(Double2D)positionsDefence.get(i));
 				schedule.scheduleRepeating(defence.get(i));
 			}
+			Frisbee frisbee = new Frisbee(positionDisc);
+			schedule.scheduleRepeating(frisbee);
 			//init Frisbee
 			//frisbee.location.add(new Vector3d(1,1,1));
 			//frisbee.location.set(0,0,1);
-			Vector3d velocity = new Vector3d(1,0,0);
-			Vector3d angles = new Vector3d(0,0.0872,0);//rad
+			Vector3d velocity = new Vector3d(50,0,3);
+			Vector3d angles = new Vector3d(0,0.08,0);//rad
 			Vector3d angleVelocity = new Vector3d(0,0,50);
 //			Vector3d velocity = new Vector3d(13.42,-.41,0.001);
 //			Vector3d angles = new Vector3d(-0.07,0.21,5.03);
 //			Vector3d angleVelocity = new Vector3d(-14.94,-1.48,54.25);
 			frisbee.throwDisc(velocity, angles, angleVelocity);
 			ultimateField.setObjectLocation(frisbee, new Double2D(frisbee.location.x,frisbee.location.y));
-			schedule.scheduleRepeating(frisbee);
 			break;
 //			
 			case "throw":

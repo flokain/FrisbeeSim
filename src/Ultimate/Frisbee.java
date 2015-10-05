@@ -18,22 +18,22 @@ public class Frisbee extends UltimateEntity implements Steppable
 	double alpha;
 	
 	//Simulation Parameters
-	private double g;  		//The acceleration of gravity (m/s^2).
-	private double RHO; 		//The density of air in kg/m^3.
-	private double AREA;	//The area of a standard frisbee.
-	private double CL0;	//The lift coefficient at alpha = 0.
-	private double CLA;	//The lift coefficient dependent on alpha.
-	private double CD0;	//The drag coefficent at alpha = 0.
-	private double CDA;	//The drag coefficient dependent on alpha.
-	private double ALPHA0;	// minimum drag and zero lift at ALPHA0 Hummel page 9
-	private double CRr;
-	private double CMO;
-	private double CMa;
-	private double CMq;
-	private double CRp;
-	private double CNr;
-	private double Ixy;
-	private double Iz;
+	private static double g;  		//The acceleration of gravity (m/s^2).
+	private static double RHO; 		//The density of air in kg/m^3.
+	private static double AREA;		//The area of a standard frisbee.
+	private static double CL0;		//The lift coefficient at alpha = 0.
+	private static double CLA;		//The lift coefficient dependent on alpha.
+	private static double CD0;		//The drag coefficent at alpha = 0.
+	private static double CDA;		//The drag coefficient dependent on alpha.
+	private static double ALPHA0;	//Minimum drag and zero lift at ALPHA0 Hummel page 9
+	private static double CRr;
+	private static double CMO;
+	private static double CMa;
+	private static double CMq;
+	private static double CRp;
+	private static double CNr;
+	private static double Ixy;
+	private static double Iz;
 	
 	public Frisbee(Double2D posi)	
 	{
@@ -80,19 +80,9 @@ public class Frisbee extends UltimateEntity implements Steppable
 		Iz = 0.002352;
 		
 	}
-	
-	@Override
-	public void step(final SimState state)
-	{   
-		force = calcForces();
-		rotAccel = calcAngularAccelaration();
-		super.step(state); //apply force
-		Ultimate ultimate = (Ultimate) state;
-		ultimate.space.setObjectLocation(this,new Double3D(location.x,location.y,location.z));
-		stepRotation(state); //apply rotation
-		
-	}
-	
+
+	// set the initial conditions for a throw.
+	// TODO maybe rename to init? or more abstract let the constructor do the init job
 	public void throwDisc(Vector3d vel,Vector3d angles, Vector3d anglesVelocity)
 	{
 		velocity = vel;
@@ -122,170 +112,15 @@ public class Frisbee extends UltimateEntity implements Steppable
 		rotate(rotation, angles.y, 1); // deines alpha at the beginning of the flight
 		orientateDisc();
 	}
-	public void flightForces() {
-			
-			double  airRes = RHO*Math.pow(velocity.length(), 2)*AREA/2; //air resistance
-			
-			// calculate alpha as the angle between velocity and x'
-			Vector3d x = new Vector3d();
-			Vector3d vel = new Vector3d(velocity.x,velocity.y,velocity.z);
-			rotation.getColumn(0, x);
-			alpha = x.angle(vel);
-			//is alpha positive or negative in the z-x plane?
-			vel.normalize();
-			x.sub(vel);
-			alpha = alpha * Math.signum(x.z);
-			
-			// 0.3.1 L = liftVec = normalized crossproduct of y' and velocity
-			Vector3d liftVec = new Vector3d();
-			Vector3d pitchVec = new Vector3d(rotation.m01,rotation.m11,rotation.m21);
-			liftVec.cross(pitchVec,velocity);
-			liftVec.normalize();
-			
-			// 0.3.2 D = DragVec = negative normalized velocity
-			Vector3d dragVec = new Vector3d(velocity);
-			dragVec.negate();
-			dragVec.normalize();		
-			
-			// 1. calculate the translational forces that are applied to the disc related to the velocity vector
-			force.set(0, 0, 0); //reset the force vector
-			
-			// 1.1 Calculation of the drag coefficient (for Prantl’s relationship)
-			// using the relationship given by S. A. Hummel.
-			double drag = (CD0 + CDA*Math.pow((alpha-ALPHA0),2))*airRes;
-			dragVec.scale(drag);
-			force.add(dragVec); // drag is in negative direction of the velocity vector
-			
-			// 1.2 Calculation of the lift coefficient (for Prantl’s relationship)
-			// 1.2.1 Stall: the Stall angle of the Frisbee is about 45° afterwards the Lift will be set to Zero, due to no more accurate information
-			double lift;
-			if (alpha <= Math.PI/2)
-			{
-				lift =  (CL0 + CLA*alpha)*airRes;
-			}
-			else if (alpha >= Math.PI/2*3)
-			{				
-				lift =  (CL0 + CLA*(alpha - Math.PI))*airRes;
-			}
-			else lift = (CL0 - CLA*(alpha + Math.PI))*airRes;
-			lift =  (CL0 + CLA*alpha)*airRes;
-			liftVec.scale(lift);
-			force.add(liftVec);		
-			
-			// (1.3.) gravitational force which is constant and always pointing "downwards" m*g
-			force.add(new Vector3d(0,0,mass*g));
-			
-			// 2. calculate the angular Forces 
-			//Initial position x = 0.
-			// momenti berechnen HUMMEL
-			
-			// 2.1 the roll vector is is orthogonal to velocity and orientation and therefore lies along orientVelocNormalVec.
-			double roll = (CRr * rotVelocity.z + CRp * rotVelocity.x) * airRes * radius * 2;
-			
-			// 2.2 the pitch vector lies along the projection from the velocity to the frisbeeplane ( defined by orientantion)
-			double pitch = (CMO + CMa * alpha + CMq * rotVelocity.y) * airRes * radius * 2;
-			
-			//2.3 the spin vector lies along the orientational vector
-			double spin = (CNr * rotVelocity.z)* airRes * radius*2;
-			
-			//2.4 the angular accelaration is defined by rotAccel = Momentum / Moment of inertia
-		
-			
-			// the equation Momenti (HUMMEL p.33) M = I*a + omega x I*omega
-			// and therefore I^(-1) * (M- omega x I*omega) = a
-			
-			Matrix3d interia = new Matrix3d();
-			interia.setM00(Ixy);
-			interia.setM11(Ixy);
-			interia.setM22(Iz);
-			
-			// tmpCross := omega x I*omega
-			Vector3d tmpCross = new Vector3d(rotVelocity);
-			interia.transform(tmpCross);
-			tmpCross.cross(rotVelocity, tmpCross);
-			
-			// set a to M
-			rotAccel.x = roll;
-			rotAccel.y = pitch;
-			rotAccel.z = spin;	
-			
-			// set a to M - omega x I*omega
-			rotAccel.sub(tmpCross);
-			
-			// set a to I^(-1) (M - omega x I*omega)
-			interia.invert();
-			interia.transform(rotAccel);
-			
-			
-	/*		// 0.1 calculate  coordinates-transformation of the rotated system y' = velocity proection on frisbee plane z' = orientation of the frisbeeplane x' = y cross z
 	
-			// 0.2 the rotation on the z axis is defined by the velocity vector, there for we still need calculate the y' and x' vectors after rotation.
-			
-			// 0.2.1 z' = spinVector = normal vector to frisbee plane;
-			Vector3d spinVec = new Vector3d(rotation.m02,rotation.m12,rotation.m22).normalize();
-			
-			// 0.2.1 y' = pitchVector = normalized velocity projected to frisbee plane which is defined by the normal vector orientation z'
-			Vector3d velocityOrientationComponend = new Vector3d(spinVec).resize(spinVec.dot(velocity)).negate();
-			Vector3d pitchVec = new Vector3d(velocity).add(velocityOrientationComponend).normalize();
-			
-			// 0.2.2. x' = rollVector = normalized crossproduct of y' and z'
-			Vector3d rollVec =  new Vector3d();
-			rollVec.setToCrossproduct(spinVec, pitchVec);
-			rollVec.normalize();
-			
-			// we can also now calculate the z rotation: by solving the equation rotation * rot_z * (0,1,0)' = y' <=> (-sin (gamma), cos(gamma), 0) = rotation^(-1) * y'
-			Matrix3d rotationInverted = new Matrix3d(rotation);
-			rotationInverted.invert();
-			Vector3d y= new Vector3d(0,1,0);
-			rotationInverted.transform(y);
-			double gamma = Math.acos(y.y);
-			rotation.rotZ(gamma);
-			
-			// 0.3.1 L = liftVec = normalized crossproduct of -velocity and y' or y' and velocity
-			Vector3d liftVec = new Vector3d();		
-			liftVec.setToCrossproduct(pitchVec,velocity);
-			
-			// 0.3.2 D = DragVec = negative normalized velocity
-			Vector3d dragVec = new Vector3d(velocity).negate().normalize();		
-			
-			// 1. calculate the translational forces that are applied to the disc related to the velocity vector
-			
-			// 1.1 Calculation of the drag coefficient (for Prantl’s relationship)
-			// using the relationship given by S. A. Hummel.
-			double drag = (CD0 + CDA*Math.pow((alpha-ALPHA0)*Math.PI/180,2))*airRes;
-			force.add(dragVec.scale(drag)); // drag is in negative direction of the velocity vector
-			
-			// 1.2 Calculation of the lift coefficient (for Prantl’s relationship)
-			double lift = (CL0 + CLA*alpha*Math.PI/180)*airRes;
-			force.add(liftVec.scale(lift));		
-			
-			// (1.3.) gravitational force which is constant and always pointing "downwards" m*g
-			force.add(new Vector3d(0,0,mass*g));
-			
-			// 2. calculate the angular Forces 
-			//Initial position x = 0.
-			// momenti berechnen HUMMEL
-			
-			// 2.1.2 calculate momenti of roll, pitch and spin
-			Vector3d omega = new Vector3d();
-			
-			// 2.1 the pitch vector lies along the projection from the velocity to the frisbeeplane ( defined by orientantion)
-			double pitch = (CMO + CMa * alpha + CMq * rotVelocity.y) * airRes * radius * 2;
-			pitchVec.scale(pitch);
-			
-			// 2.2 the roll vector is is orthogonal to velocity and orientation and therefore lies along orientVelocNormalVec.
-			double roll = (CRr * rotVelocity.z + CRp * rotVelocity.x) * airRes * radius * 2;
-			rollVec.scale(roll);
-			
-			//2.3 the spin vector lies along the orientational vector
-			double spin = (CNr * rotVelocity.z)* airRes * radius*2;
-			spinVec.scale(spin);
-			
-			//2.4 the angular accelaration is defined by rotAccel = Momentum / Moment of inertia
-			rotAccel.x = roll / Ixy;
-			rotAccel.y = roll / Ixy;
-			rotAccel.z = roll / Iz;	*/	
-		}
+	//Setter and Getter
+	public Vector3d getRotVelocity() 					{return rotVelocity;}
+	public void setRotVelocity(Vector3d rotVelocity) 	{this.rotVelocity = rotVelocity;}
+	public Vector3d getAngles()							{return angles;}
+	public void setAngles(Vector3d angles) 				{this.angles = angles;}
+	public double getAlpha() 							{return alpha;}
+	
+	//Variable Calculations
 	private double calcAirRes()
 	{
 		return RHO*Math.pow(velocity.length(), 2)*AREA/2; //air resistance
@@ -295,52 +130,24 @@ public class Frisbee extends UltimateEntity implements Steppable
 		// calculate alpha as the angle between velocity and x'
 		Vector3d x = new Vector3d();
 		Vector3d vel = new Vector3d(velocity);
-		
 		rotation.getColumn(0, x);
+		double alpha = -vel.angle(x);
 		
+		rotation.getColumn(2, x);
+		double vc3 = vel.dot(x);
+		x.scale(vc3);
+		vel.sub(x);
 		
 	// The angle of attack
 		
-		double alpha = -vel.angle(x);
+		alpha = Math.atan(vc3/vel.length());
 		// we need to know which of the vector is pointing more in z direction 
 		// we project to the z-velocity plane. it is defined by the cross product of z and the velocity vector
-		Vector3d plane = new Vector3d();
-		Vector3d globalZ =new Vector3d (0,0,1);
-		plane.cross(vel, globalZ);
-		plane.normalize();
-		
-		//now we project vel and x to that plane
-		//vel = projection(vel,plane) stays the same
-		x = projection(x,plane);
-				
-		// now we need to fin out if the disc is pointing lower than the velocity vector.
-		// if x is pointing in negative velocity direction meaning that the dis is flipped
-		// it will be handled as if it was not fliped meaning that x is set as -x.
-		if ( x.dot(vel) <=0 ) x.scale(-1);
-		
-		// now we just look for the closer angle to z. if vel is closer, alpha is negative.
-		if (x.angle(globalZ) > vel.angle(globalZ)) alpha = -alpha;
-		
-		// if x lies now above the line defined by z = vel.angle*(sqrtx^2+y^2) the angle is positive else it is negative.
-		
-		
-/*		double velAngle = Math.signum(vel.z) * x.angle(new Vector3d(vel.x,vel.y,0)); // at positiv z it points upward
-		
-		double line = velAngle * ( (new Vector3d(x.x, x.y,0)).length());
-		if(line >= x.z)
-		{
-			alpha = -x.angle(vel);
-		}
-		else
-		{
-			alpha = x.angle(vel);
-		}*/
 		return alpha;
 	}
-	private Vector3d calcForces() 
+	
+	private Vector3d calcForces(double alpha,double airRes, Vector3d velocity, Matrix3d rotation) 
 	{
-		double airRes = calcAirRes();
-		alpha = calcAlpha();
 		Vector3d force = new Vector3d();
 		
 	//calculate  Lift
@@ -385,11 +192,8 @@ public class Frisbee extends UltimateEntity implements Steppable
 		force.add(new Vector3d(0,0,mass*g));
 		return force;
 	}
-	private Vector3d calcAngularAccelaration()
+	private Vector3d calcAngularAccelaration(double alpha,double airRes,Vector3d angles, Vector3d rotVelocity)
 	{
-		double airRes = calcAirRes();
-		double alpha = calcAlpha();
-		Vector3d angAccel;
 		
 		
 	// calculate the angular Momentum
@@ -441,15 +245,29 @@ public class Frisbee extends UltimateEntity implements Steppable
 		return rotAccel;
 	}
 	
-	private void stepRotation(SimState state)
-	{
-		Ultimate ultimate = (Ultimate)state;
-		rotAccel.scale(ultimate.stepTime); // one step is a thousand of a second
+	//Simulation stepper
+	@Override
+	public void step(final SimState state)
+	{   
+		alpha = calcAlpha();
+		double airRes = calcAirRes();
+		force = calcForces(alpha,airRes,velocity,rotation);
+		rotAccel = calcAngularAccelaration(alpha,airRes,angles, rotVelocity);
 		
-		rotVelocity.add(rotAccel); //add delta accelaration to velocity rotation
+		Ultimate ultimate = (Ultimate) state;
+		
+		flightForces();
+		super.step(state); //apply force
+		stepRotation(ultimate); //apply rotation
+		ultimate.space.setObjectLocation(this,new Double3D(location.x,location.y,location.z));
+
+	}
+	private void stepRotation(Ultimate state)
+	{
+		
 		Vector3d deltaRotVelocity = new Vector3d(rotVelocity);
-		deltaRotVelocity.scale(ultimate.stepTime); //calc delta rotation
-			
+		deltaRotVelocity.scale(state.stepTime); //calc delta rotation
+		angles.add(deltaRotVelocity);	
 		Matrix3d deltaRotation = new Matrix3d();	//write rotation in Matrix form	
 		deltaRotation.setIdentity();
 		rotate(deltaRotation, deltaRotVelocity.x, 0); //apply x rotation
@@ -459,20 +277,127 @@ public class Frisbee extends UltimateEntity implements Steppable
 		rotation.mul(deltaRotation);		// // rotate by delta rotation 	
 		
 		//reorientate the disc
-		Vector3d rotationZ = new Vector3d();
-		Vector3d rotationX = new Vector3d();
-		Vector3d rotationY = new Vector3d();
-		rotation.getColumn(2,rotationZ);
+		orientateDisc();
+		rotAccel.scale(state.stepTime); // one step is a thousand of a second
+		rotVelocity.add(rotAccel); //add delta accelaration to velocity rotation
 		
-		rotationY.cross(rotationZ, velocity);
-		rotationY.normalize();
-		rotationX.cross(rotationY,rotationZ);
-		
-		rotation.setColumn(0, rotationX);
-		rotation.setColumn(1, rotationY);
-
-		ultimate.space.setObjectLocation(this,new Double3D(location.x,location.y,location.z));
 	}
+	
+	// Matlab copy of  Hummels frisbee eqautions for evaluation purposes
+	public void flightForces() {
+			
+			
+			Matrix3d T_c_N = new Matrix3d();
+			T_c_N.setIdentity();
+			rotate(T_c_N,angles.x,0);
+			rotate(T_c_N,angles.y,1);
+			
+			
+			// calculate aerodynamic forces and moments 
+			// everyvector is expressed in the N frame
+			Vector3d vel = new Vector3d(velocity.x,velocity.y,velocity.z);
+			Vector3d c3 = new Vector3d();
+			T_c_N.getColumn(2, c3);
+			
+			double vc3 = vel.dot(c3);
+			Vector3d vp = new Vector3d(vel);
+			Vector3d uvp = new Vector3d();
+			Vector3d uvel = new Vector3d();
+			Vector3d ulat = new Vector3d();
+			Vector3d vc3c3 = new Vector3d(c3);
+			vc3c3.scale(vc3);
+			
+			vp.sub(vc3c3);  //vp= [vel-vc3*c3]; 
+			alpha = Math.atan(vc3/vp.length());
+			
+			double  Adp = RHO*Math.pow(velocity.length(), 2)*AREA/2; //air resistance
+			
+			uvel = vel;
+			uvel.normalize();
+			
+			uvp = vp;
+			uvp.normalize();
+			
+			ulat.cross(c3,uvp);
+			
+			Vector3d omega_C = new Vector3d (Math.cos(angles.y)*rotVelocity.x,rotVelocity.y,Math.sin(angles.y)*rotVelocity.x + rotVelocity.z);
+			Vector3d omega_N = new Vector3d(omega_C);
+			T_c_N.transform(omega_N);
+			
+			double omegavp = omega_N.dot(uvp);
+			double omegalat = omega_N.dot(ulat);
+			double omegaspin = omega_N.dot(c3);
+			
+			double AdvR = radius*2*omegaspin/2/vel.length() ;
+			
+			double CL = CL0 + CLA*alpha; 
+			double alphaeq = -CL0/CLA;  // this is angle of attack at zero lift 
+			double CD = CD0 + CDA*(alpha-alphaeq)*(alpha-alphaeq); 
+			double CM=CMO + CMa*alpha; 
+		    
+		    double lift = CL*Adp; 
+		    double drag = CD*Adp; 
+		    Vector3d ulift = new Vector3d();       //ulift always has - d3 component 
+		    Vector3d udrag = new Vector3d();
+		    Vector3d uearth = new Vector3d();
+		    
+		    ulift.cross(uvel,ulat);
+		    ulift.negate();
+		    udrag = uvel;
+		    udrag.negate();
+		    uearth.set(0, 0, 1);
+		    
+		    ulift.scale(lift);
+		    udrag.scale(drag);
+		    uearth.scale(mass*g);
+
+		    force.set(0,0,0);
+			force.add(ulift);
+			force.add(udrag);
+			force.add(uearth);
+			
+			Vector3d mvp = new Vector3d(uvp);
+			Vector3d mlat = new Vector3d(ulat);
+			Vector3d mspin = new Vector3d(c3);
+			
+			double roll = Adp*radius*2* (CRr*omegaspin + CRp*omegavp);
+			double pitch = Adp*radius*2* (CM + CMq*omegalat);
+			double spin = Adp*radius*2*CNr*(omegaspin);
+			
+			mvp.scale(roll);
+			mlat.scale(pitch);
+			mspin.scale(spin);
+			
+			T_c_N.transpose();
+			T_c_N.transform(mvp);
+			T_c_N.transform(mlat);
+			T_c_N.transform(mspin);
+			
+			Vector3d m = new Vector3d();
+			m.add(mvp);
+			m.add(mlat);
+			m.add(mspin);
+			
+			accel = new Vector3d(force);
+			accel.scale(1/mass);
+			
+			double phi = angles.x;
+			double th = angles.y;
+			double gam = angles.z;
+			double fd = rotVelocity.x;
+			double thd = rotVelocity.y;
+			double gd = rotVelocity.z;
+			double Id = Ixy;
+			double Ia = Iz;
+			double st = Math.sin(th);
+			double ct = Math.cos(th);
+			
+			rotAccel.x = (m.x + Id*thd*fd*st - Ia*thd*(fd*st+gd) +Id*thd*fd*st)/Id/ct;
+			rotAccel.y = (m.y + Ia*fd*ct*(fd*st +gd) - Id*fd*fd*ct*st)/Id; 
+			rotAccel.z = (m.z - Ia*(rotAccel.x*st + thd*fd*ct))/Ia;
+		}
+	
+	//An old relict, find out what it is...
 	public void flightForces2() {
 		final double g = 	-9.81; 		//The acceleration of gravity (m/s^2).
 		final double m = 	 0.175; 	//The mass of a standard frisbee in kilograms.
@@ -584,6 +509,7 @@ public class Frisbee extends UltimateEntity implements Steppable
 		rotAccel.z = (M.z - Ia*(rotAccel.x*st + thd*fd*ct))/Ia;
 	}
 
+	// Helpfull functions for Matrix calculus
 	private void orientateDisc()
 	{
 		//  the x coordinate of the disc is always the of the projected velocity vector therefore rotation must be adjusted each step after forces have been applied.
@@ -591,7 +517,8 @@ public class Frisbee extends UltimateEntity implements Steppable
 		//  rotation_old * orientation = rotation_old^(-1) * rotation_new. 
 		//TODO 
 		//Since orientation is a rotation around the local z axis of the disc this may be simplified to beta = arccos( rotation_old.col1 * rotation_new.col1).
-		Vector3d spinVec = new Vector3d(rotation.m02,rotation.m12,rotation.m22);
+		Vector3d spinVec = new Vector3d();
+		rotation.getColumn(2, spinVec);
 		
 		// 1 rollvec is the projection of velocity to the frisbee plane
 		Vector3d rollVec  = projection(velocity, spinVec);
@@ -605,7 +532,12 @@ public class Frisbee extends UltimateEntity implements Steppable
 		// 3. spin stays the same
 		
 		rotation.setColumn(0, rollVec);
-		rotation.setColumn(1, pitchVec);		
+		rotation.setColumn(1, pitchVec);
+		
+//		rotation.setIdentity();
+//		rotate(rotation,angles.x,0);
+//		rotate(rotation,angles.y,1);
+//		//rotate(rotation,angles.z,2);
 	}
 	private void rotate(Matrix3d mat,double angle,int axis) 
 	{
@@ -628,20 +560,5 @@ public class Frisbee extends UltimateEntity implements Steppable
 		proj.sub(direc);
 		return proj;
 	}
-	public double getAlpha() {return alpha;}
-	public double zigZag(double alpha)
-	{
-		double abs = Math.abs(alpha);
-		if (abs <= Math.PI/4)
-		{
-			 // alpha stays the same
-		}
-		else if (abs >= Math.PI/2*3)
-		{				
-			alpha =  alpha- Math.PI; // also going up
-		}
-		else alpha = Math.PI/2 - alpha; // going down
-		return alpha;
-	}
-	
+
 }

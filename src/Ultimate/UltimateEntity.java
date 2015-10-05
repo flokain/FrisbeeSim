@@ -31,40 +31,18 @@ public abstract class UltimateEntity implements Steppable{
 	public double cap;
 	
 	// Accessors for inspector
-	public double getX() { return location.x; }
-	public void setX( double newX ) { location.x = newX; }
+	public Vector3d getLocation() { return location; }
+	public void getLocation( Vector3d location ) { this.location = location; }
 
-	public double getY() { return location.y; }
-	public void setY( double newY ) { location.y = newY; }
-	public double getZ() { return location.z; }
-	public void setZ( double newZ ) { location.z = newZ; }
-
-	public double getVelocityX() { return velocity.x; }
-	public void setVelocityX( double newX ) { velocity.x = newX; }
-
-	public double getVelocityY() { return velocity.y; }
-	public void setVelocityY( double newY ) { velocity.y = newY; }
-
-	public double getVelocityZ() { return velocity.z; }
-	public void setVelocityZ( double newZ ) { velocity.z = newZ; }
+	public Vector3d getVelocity() { return velocity; }
+	public void setVelocity( Vector3d velocity ) { this.velocity = velocity; }
 	
-	public double getAccelarationX() { return accel.x; }
-	public void setAccelarationX( double newX ) { accel.x = newX; }
 	
-	public double getAccelarationZ() { return accel.z; }
-	public void setAccelarationZ( double newZ ) { accel.z = newZ; }
-
-	public double getAccelarationY() { return accel.y; }
-	public void setAccelarationY( double newY ) { accel.y = newY; }	
+	public Vector3d getAccelaration() { return accel; }
+	public void setAccelaration( Vector3d newXaccel ) { this.accel = accel; }
 
 	public double getRadius() { return radius; }
-	
-	public double getZigZag(){return radius;}
-	
-	public void setRadius( double newRadius ) 
-	{
-		radius = newRadius;
-	} 
+	public void setRadius( double radius ) { this.radius = radius; }
 
 	public double getMass() { return mass; }
 	public void setMass( double newMass ) { mass = newMass; } 
@@ -96,7 +74,6 @@ public abstract class UltimateEntity implements Steppable{
 	public UltimateEntity(Double2D posi, double mass, double radius){
 		this(  posi,new Double2D(0,0),new Double2D(0,0), mass, radius);	
 	}
-
 	public UltimateEntity( Double2D posi, double radius, Color c )
 	{
 		this( posi,new Double2D(0,0),new Double2D(0,0),1.0, radius);
@@ -106,72 +83,18 @@ public abstract class UltimateEntity implements Steppable{
 		this(posi, 1.0, c);
 	}
 
-	public boolean isValidMove( final Ultimate ultimate, final Vector3d newLoc)
-	{
-		Bag objs = ultimate.ultimateField.getObjectsWithinDistance(new Double2D(location.x, location.y), 10);
-
-		double dist = 0;
-
-		// check objects
-		for(int x=0; x<objs.numObjs; x++)
-		{
-			if(objs.objs[x] != this)
-			{
-				Vector3d tmp = new Vector3d(((UltimateEntity)objs.objs[x]).location);
-				tmp.sub(newLoc);
-				dist = tmp.length();
-
-				if((((UltimateEntity)objs.objs[x]).radius + radius) > dist)  // collision!
-					return false;
-			}
-		}
-
-		// check walls
-		if(newLoc.x > ultimate.fieldLength)
-		{
-			if (velocity.x > 0) velocity.x = -velocity.x;
-			return false;
-		}
-		else if(newLoc.x < 0)
-		{
-			if (velocity.x < 0) velocity.x = -velocity.x;
-			return false;
-		}
-		else if(newLoc.y > ultimate.fieldWidth)
-		{
-			if (velocity.y > 0) velocity.y = -velocity.y;
-			return false;
-		}
-		else if(newLoc.y < 0)
-		{
-			if (velocity.y < 0) velocity.y = -velocity.y;
-			return false;
-		}
-
-		// no collisions: return, fool
-		return true;
-	}
-
-	public void capVelocity()
-	{
-		if(velocity.length() > cap)
-			velocity.normalize();
-			velocity.scale(cap);
-	}
 	// one step is a thousand of a second
 	
 	public void step( final SimState state )
 	{
 		Ultimate ultimate = (Ultimate)state;
 		
-		accel.scale(1/mass,force);
+		accel.scale(1./mass,force);
 		accel.scale(ultimate.stepTime); // one step is a thousand of a second
-		
-		velocity.add(accel);
 		Vector3d deltaVelocity = new Vector3d(velocity);
 		deltaVelocity.scale(ultimate.stepTime);
 		location.add(deltaVelocity);  // resets newLoc
-
+		velocity.add(accel);
 		ultimate.ultimateField.setObjectLocation(this,new Double2D(location.x, location.y)); //set the loaction
 	}
 }

@@ -183,7 +183,8 @@ public class UltimateWithUI extends GUIState
 		rotation.setIdentity();
 		rotation.rotX(Math.PI/2);
 		Vector3d translation = new Vector3d(0,-10,0);//new Vector3d(1,-5,1);
-		translation.add(((Ultimate)state).frisbee.location);
+		Vector3d discPosi = new Vector3d(((Ultimate)state).positionDisc.x,((Ultimate)state).positionDisc.y,((Ultimate)state).positionDisc.z);
+		translation.add(discPosi);
 		Transform3D lookAt  = new Transform3D(rotation,translation,3);
 		display3D.universe.getViewingPlatform().getViewPlatformTransform().setTransform(lookAt); // this sets the viewpoint!
 		

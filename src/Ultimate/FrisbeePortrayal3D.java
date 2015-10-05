@@ -100,12 +100,7 @@ public class FrisbeePortrayal3D extends PrimitivePortrayal3D
 			catch (java.io.FileNotFoundException ex){
 			}
 		}
-//		   	Matrix3d rot = new Matrix3d();
-//		   	rot.m00 = 1;
-//		   	rot.m21 = 1;
-//		   	rot.m12 = 1;
-//		   	rot.mul(frisbee.rotation);
-//		   	
+		   	
 		   	prev.setTransform(new Transform3D(frisbee.rotation, frisbee.location,1));
 		return prev;
 	}

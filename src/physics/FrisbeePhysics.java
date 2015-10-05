@@ -14,7 +14,7 @@ public class FrisbeePhysics {
 	private double mass;
 	private double radius;
 
-	
+
 	private Vector3d x; 				// position in global frame
 	private Vector3d v; 				// velocity in x,y,z direction
 	private Vector3d a; 				// accelaration in x,y,z directi
