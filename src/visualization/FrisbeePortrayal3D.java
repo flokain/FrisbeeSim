@@ -27,6 +27,8 @@ import sim.util.Double3D;
 
 public class FrisbeePortrayal3D extends SimplePortrayal3D
 {
+	TransformGroup tgFrisbee;
+	BranchGroup tgPhysics;
 
 	/** Constructs a FrisbeePortrayal3D with a default (flat opaque white) appearance and a scale of 1.0. */
     public FrisbeePortrayal3D()
@@ -62,6 +64,9 @@ public class FrisbeePortrayal3D extends SimplePortrayal3D
     
     public FrisbeePortrayal3D(Appearance appearance, boolean generateNormals, boolean generateTextureCoordinates, double scale)
     {
+    	TransformGroup tgFrisbee = new TransformGroup();
+		tgFrisbee.setCapability(Group.ALLOW_CHILDREN_READ);
+		tgFrisbee.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
     	//this.appearance = appearance;
 	    //setScale(null, scale);       
 	    //TransformGroup prev = new TransformGroup();
@@ -86,31 +91,32 @@ public class FrisbeePortrayal3D extends SimplePortrayal3D
 	{
 		Frisbee frisbee = (Frisbee)object;
 
-		if (j3dModel == null) // scene graph is being created
+		if (j3dModel == null)
 		{
 			j3dModel = new TransformGroup();
-		   	j3dModel.setCapability(Group.ALLOW_CHILDREN_READ);
-		   	j3dModel.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-			
+			j3dModel.setCapability(Group.ALLOW_CHILDREN_READ);
+			j3dModel.setCapability(Group.ALLOW_PICKABLE_READ);
+			j3dModel.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 			try
 			{	
-				//tgFrisbee = loadModel(frisbee);
 				j3dModel.addChild(loadModel(frisbee));
-				//tgPhysics = createPhysicsArrows(frisbee);
-				//j3dModel.addChild(tgPhysics);
-				//j3dModel.addChild(createAxes());
 			}
 			catch (java.io.FileNotFoundException ex){}
-			//CubePortrayal3D e34 = new CubePortrayal3D();
-			//j3dModel.addChild(e34.getModel(object, null).cloneTree());
+			BranchGroup arrows = new BranchGroup();
+			arrows.setCapability(Group.ALLOW_CHILDREN_WRITE);
+			arrows.setCapability(Group.ALLOW_CHILDREN_EXTEND);
+			arrows.setCapability(BranchGroup.ALLOW_DETACH);
+			j3dModel.addChild(createPhysicsArrows(frisbee,arrows));
 		}
-		TransformGroup tgFrisbee = new TransformGroup();
-		tgFrisbee.setCapability(Group.ALLOW_CHILDREN_READ);
-		tgFrisbee.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-		tgFrisbee = (TransformGroup) j3dModel.getChild(0);
-		//tgPhysics = createPhysicsArrows(frisbee);
-		tgFrisbee.setTransform(new Transform3D(frisbee.getRotation(),new Vector3d(0,0,0),1));
+		TransformGroup tgDiscOrient = (TransformGroup) j3dModel.getChild(0);
+		BranchGroup tgPhysicsArrows = (BranchGroup) j3dModel.getChild(1);
+		
+		tgDiscOrient.setTransform(new Transform3D(frisbee.getRotation(),new Vector3d(0,0,0),1));
+		tgPhysicsArrows.removeAllChildren();
+		createPhysicsArrows(frisbee,tgPhysicsArrows);
+		
 		j3dModel.setTransform(new Transform3D(new Matrix3d(1,0,0,0,1,0,0,0,1),frisbee.getLocation(),1));
+		
 		return j3dModel;
 	}
 	
@@ -137,19 +143,23 @@ public class FrisbeePortrayal3D extends SimplePortrayal3D
     temp.addChild(new Arrow(arrowRadius, new Double3D(0, 0, 0), new Double3D(0,0,1), null, "Z", null));
     return temp;
     }
-	BranchGroup createPhysicsArrows(Frisbee frisbee)
+	BranchGroup createPhysicsArrows(Frisbee frisbee,BranchGroup bg)
 	{
 		BranchGroup temp = new BranchGroup();
 	    temp.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
+	    temp.setCapability(BranchGroup.ALLOW_DETACH);
 	    double arrowRadius = 0.01;
-	    temp.addChild(new Arrow(arrowRadius, new Double3D(0, 0, 0), vToD3d(frisbee.getVelocity()), null  , "vel", null));
-	    temp.addChild(new Arrow(arrowRadius, new Double3D(0, 0, 0), vToD3d(frisbee.getAccelaration()), null, "accel", null));
-	    return temp;
+	    temp.addChild(new Arrow(arrowRadius, new Double3D(0, 0, 0), vToD3d(frisbee.getVelocity(),1), null  , "vel", null));
+	    temp.addChild(new Arrow(arrowRadius, new Double3D(0, 0, 0), vToD3d(frisbee.getAccelaration(),1), null, "accel", null));
+	    bg.addChild(temp);
+	    return bg;
     }
 	
-	Double3D vToD3d(Vector3d v)
+	Double3D vToD3d(Vector3d v,double length)
 	{
-		return new Double3D(v.x,v.y,v.z);
+		Double3D re= new Double3D(v.x,v.y,v.z);
+		return re.resize(length);
+		
 	}
 }
 
