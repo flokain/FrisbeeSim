@@ -21,6 +21,7 @@ public class Ultimate extends SimState{
 	double stepTime = 0.0001; // simulated time that elapses between 2 steps (all forces are calculated in m/s^2)
 	Bag positionsOffence;
 	Bag positionsDefence;
+	Frisbee frisbee;
 	Double3D positionDisc;
 
 	public Ultimate(long seed)
@@ -57,6 +58,7 @@ public class Ultimate extends SimState{
 	public void start()
 	{
 		super.start();
+		
 		//init field;
 		ultimateField2D = new Continuous2D(0.1, fieldLength,fieldWidth);
 		ultimateField3D = new Continuous3D(0.001, fieldLength, fieldWidth, 40);
@@ -89,17 +91,19 @@ public class Ultimate extends SimState{
 				ultimateField2D.setObjectLocation(defence.get(i),(Double2D)positionsDefence.get(i));
 				schedule.scheduleRepeating(defence.get(i));
 			}
+			//init Frisbee
 			Frisbee frisbee = new Frisbee(positionDisc);
 			schedule.scheduleRepeating(frisbee);
-			//init Frisbee
 			//frisbee.location.add(new Vector3d(1,1,1));
 			//frisbee.location.set(0,0,1);
-			Vector3d velocity = new Vector3d(50,0,3);
-			Vector3d angles = new Vector3d(0,0.08,0);//rad
-			Vector3d angleVelocity = new Vector3d(0,0,50);
 //			Vector3d velocity = new Vector3d(13.42,-.41,0.001);
 //			Vector3d angles = new Vector3d(-0.07,0.21,5.03);
 //			Vector3d angleVelocity = new Vector3d(-14.94,-1.48,54.25);
+			
+			Vector3d velocity = new Vector3d(50,0,0);
+			Vector3d angles = new Vector3d(0,0.08,0.00);//rad
+			Vector3d angleVelocity = new Vector3d(0,0,50);
+
 			frisbee.throwDisc(velocity, angles, angleVelocity);
 			ultimateField2D.setObjectLocation(frisbee, new Double2D(frisbee.location.x,frisbee.location.y));
 			break;
@@ -126,5 +130,4 @@ public class Ultimate extends SimState{
 		doLoop(Ultimate.class, args);
 		System.exit(0);
 	}   
-
 }
