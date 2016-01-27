@@ -38,10 +38,12 @@ public class Frisbee extends UltimateEntity implements Steppable
 	private static double Ixy;
 	private static double Iz;
 	
+	public Frisbee()	
+	{
+		this(new Vector3d(), new Vector3d());
+	}	
 	public Frisbee(Double2D posi)	
 	{
-		//		double radius = 0.155; 	//radius of an ultrastar disc ?
-		//		double mass = 0.175; 	//mass of an ulstrastar disc
 		this(new Vector3d(posi.x,posi.y,0), new Vector3d());
 	}	
 	public Frisbee(Double3D posi)	
@@ -265,19 +267,60 @@ public class Frisbee extends UltimateEntity implements Steppable
 		double airRes = calcAirRes();
 		force = calcForces(alpha,airRes,velocity,rotation);
 		rotAccel = calcAngularAccelaration(alpha,airRes,angles, rotVelocity);
-		
 		Ultimate ultimate = (Ultimate) state;
 		
 		//flightForces();
 		stepRotation(ultimate); //apply rotation
 		super.step(state); //apply force and set location in the enviroment
-		stepRotation(ultimate); //apply rotation
-		ultimate.ultimateField3D.setObjectLocation(this,new Double3D(location.x,location.y,location.z)); //set the location in 3d portrayal
 
 	}
 	private void stepRotation(Ultimate state)
 	{
 		
+//		Vector3d deltaRotVelocity = new Vector3d(rotVelocity);
+//		deltaRotVelocity.scale(state.stepTime); 	// calc delta rotation
+//		
+//		angles.add(deltaRotVelocity);
+//		
+//		// dR/dt = [ omega x Rx,  omega x Ry, omega x Rz ]
+//		Matrix3d deltaRotation = new Matrix3d();	//write rotation in Matrix form	
+//		
+//		
+//		Vector3d Rx = new Vector3d(rotVelocity);
+//		Vector3d Ry = new Vector3d(rotVelocity);
+//		Vector3d Rz = new Vector3d(rotVelocity);
+//		
+//		//oder doch row?
+//		rotation.getColumn(0, Rx);
+//		rotation.getColumn(1, Ry);
+//		rotation.getColumn(2, Rz);
+//		
+//		Rx.cross(rotVelocity, Rx);
+//		Ry.cross(rotVelocity, Ry);
+//		Rz.cross(rotVelocity, Rz);
+//		
+//		deltaRotation.setColumn(0, Rx);
+//		deltaRotation.setColumn(1, Ry);
+//		deltaRotation.setColumn(2, Rz);
+//		
+//		deltaRotation.mul(state.stepTime);
+//		
+//		rotate(deltaRotation, deltaRotVelocity.x, 0); // apply x rotation
+//		rotate(deltaRotation, deltaRotVelocity.y, 1); // apply y rotation
+//		rotate(deltaRotation, deltaRotVelocity.z, 2); // apply z rotation
+//
+//		rotation.mul(deltaRotation);		// // rotate by delta rotation 	
+//			
+//		rotation.setIdentity();
+//		rotate(rotation, angles.x, 0);
+//		rotate(rotation, angles.y, 1);
+//		rotate(rotation, angles.z, 2);
+//		rotAccel.scale(state.stepTime); // one step is a thousand of a second
+//		rotVelocity.add(rotAccel); //add delta accelaration to velocity rotation
+		
+		//reorientate the disc
+		
+		orientateDisc();
 		Vector3d deltaRotVelocity = new Vector3d(rotVelocity);
 		deltaRotVelocity.scale(state.stepTime); //calc delta rotation
 		angles.add(deltaRotVelocity);	
@@ -293,7 +336,6 @@ public class Frisbee extends UltimateEntity implements Steppable
 		orientateDisc();
 		rotAccel.scale(state.stepTime); // one step is a thousand of a second
 		rotVelocity.add(rotAccel); //add delta accelaration to velocity rotation
-		
 	}
 	
 	// Matlab copy of  Hummels frisbee eqautions for evaluation purposes

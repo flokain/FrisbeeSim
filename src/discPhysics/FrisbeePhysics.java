@@ -1,4 +1,4 @@
-package physics;
+package discPhysics;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Tuple3d;
@@ -41,15 +41,9 @@ public class FrisbeePhysics {
 		inertiaTensor = new Matrix3d						// Frisbee is a symetrical object, the inertia around the x and y axis are the same
 			(	0.001219,			0,			0, 			// 0,0: Inertia on the x axis
 				0		,	 0.001219,			0,			// 1,1: Inertia on the y axis
-				0		,			0,	 0.002352	);		// 2,2: Inertia on the z axis	
-		mass = 
-		
+				0		,			0,	 0.002352	);		// 2,2: Inertia on the z axis		
 	}
 	
-	public FrisbeePhysics frisbeeDE()
-	{
-		
-	}
 	
 	public FrisbeePhysics addAngularMomentum(Vector3d mo){
 		this.mo.add((Tuple3d)mo);

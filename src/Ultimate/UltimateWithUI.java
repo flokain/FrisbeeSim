@@ -3,7 +3,6 @@
   Licensed under the Academic Free License version 3.0
   See the file "LICENSE" for more information
  */
-//test
 
 package Ultimate;
 import sim.engine.*;
@@ -43,7 +42,7 @@ public class UltimateWithUI extends GUIState
 	public Display3D display3D;
 	public JFrame display3DFrame;
 	ContinuousPortrayal3D entityPortrayal3D = new ContinuousPortrayal3D();
-    ValueGrid2DPortrayal3D FieldPortrayal3D = new ValueGrid2DPortrayal3D("Field Projection");
+    //ValueGrid2DPortrayal3D FieldPortrayal3D = new ValueGrid2DPortrayal3D("Field Projection");
     
 	public static void main(String[] args)
 	{
@@ -63,6 +62,14 @@ public class UltimateWithUI extends GUIState
 		super.start();
 		// set up our portrayals
 		setupPortrayals();
+		
+		// reschedule the displayer just to be shure
+		display2D.reset();
+		display3D.reset();
+		// redraw the display
+		display2D.repaint();
+        display3D.createSceneGraph();
+
 	}
 	@Override
 	public void load(SimState state)
@@ -136,11 +143,11 @@ public class UltimateWithUI extends GUIState
 		bounds2D.setBounds(0, 0, boundsCon.x, (int)(screen.height*heightRelative2D));
 		bounds3D.setBounds(0, (int)(screen.height*heightRelative2D),boundsCon.x , (int)(screen.height*(1-heightRelative2D)-taskBarHeight));
 		
-		c.registerFrame(display2DFrame);   // register the frame so it appears in the "display2D" list
-		c.registerFrame(display3DFrame);   // register the frame so it appears in the list in the controller
-		
 		display2DFrame.setBounds(bounds2D);
 		display3DFrame.setBounds(bounds3D);
+		
+		c.registerFrame(display2DFrame);   // register the frame so it appears in the "display2D" list
+		c.registerFrame(display3DFrame);   // register the frame so it appears in the list in the controller
 	}
 	
 	@Override
@@ -157,12 +164,11 @@ public class UltimateWithUI extends GUIState
 		display3D = null;       // let gc
 	}
 
-	// Portrayal steups
+	// Portrayal setups
 	public void setupPortrayals()
 	{
 		setupFieldPortrayal2d();
-		setupFrisbeePortrayal3d();
-		
+		setupFrisbeePortrayal3d();	
 	}
 	public void setupFrisbeePortrayal3d()
 	{
@@ -171,8 +177,6 @@ public class UltimateWithUI extends GUIState
 		//entityPortrayal3D.setPortrayalForClass(PlayerOffence.class, new UltimateEntityPortrayal3D());
 		entityPortrayal3D.setPortrayalForClass(PlayerOffence.class, new CubePortrayal3D(Color.blue));
 		entityPortrayal3D.setPortrayalForClass(PlayerDefence.class, new Shape3DPortrayal3D(new Shape3D(new sim.app.crowd3d.GullCG())));
-        display3D.reset();
-        display3D.createSceneGraph();
        
 	}
 	@SuppressWarnings("serial")
@@ -184,12 +188,6 @@ public class UltimateWithUI extends GUIState
 		entityPortrayal2D.setPortrayalForClass(PlayerOffence.class, new UltimateEntityPortrayal2D(Color.blue,Color.green));
 		entityPortrayal2D.setPortrayalForClass(PlayerDefence.class, new UltimateEntityPortrayal2D(Color.red,Color.green));
 		entityPortrayal2D.setPortrayalForClass(Frisbee.class, new UltimateEntityPortrayal2D(Color.white,Color.green));
-
-		// reschedule the displayer
-		display2D.reset();
-
-		// redraw the display
-		display2D.repaint();
 	}
 }
 
