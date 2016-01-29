@@ -5,13 +5,12 @@ import java.awt.Image;
 
 import javax.media.j3d.Appearance;
 import javax.media.j3d.Group;
-import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
+
+import sim.portrayal3d.simple.PrimitivePortrayal3D;
 
 import com.sun.j3d.loaders.Scene;
 import com.sun.j3d.loaders.objectfile.ObjectFile;
-
-import sim.portrayal3d.simple.PrimitivePortrayal3D;
 
 public class UltimateEntityPortrayal3D extends PrimitivePortrayal3D 
 {
@@ -78,7 +77,8 @@ public class UltimateEntityPortrayal3D extends PrimitivePortrayal3D
 	    group = prev;
     }
     
-    protected int numShapes() { return 1; }
+    @Override
+	protected int numShapes() { return 1; }
     
 }
 

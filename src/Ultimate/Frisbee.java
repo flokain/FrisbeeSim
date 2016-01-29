@@ -1,13 +1,12 @@
 package Ultimate;
 
-import java.io.IOException;
-
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
 import sim.engine.SimState;
 import sim.engine.Steppable;
-import sim.util.*;
+import sim.util.Double2D;
+import sim.util.Double3D;
 
 public class Frisbee extends UltimateEntity implements Steppable
 {

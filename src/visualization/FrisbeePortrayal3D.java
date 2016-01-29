@@ -6,24 +6,19 @@ import java.awt.Image;
 import javax.media.j3d.Appearance;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Group;
-import javax.media.j3d.Shape3D;
+import javax.media.j3d.Node;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import sim.portrayal3d.SimplePortrayal3D;
+import sim.portrayal3d.simple.Arrow;
+import sim.util.Double3D;
 import Ultimate.Frisbee;
 
 import com.sun.j3d.loaders.Scene;
 import com.sun.j3d.loaders.objectfile.ObjectFile;
-
-import sim.app.woims3d.Vector3D;
-import sim.portrayal.LocationWrapper;
-import sim.portrayal3d.SimplePortrayal3D;
-import sim.portrayal3d.simple.Arrow;
-import sim.portrayal3d.simple.CubePortrayal3D;
-import sim.portrayal3d.simple.PrimitivePortrayal3D;
-import sim.util.Double3D;
 
 public class FrisbeePortrayal3D extends SimplePortrayal3D
 {
@@ -87,6 +82,7 @@ public class FrisbeePortrayal3D extends SimplePortrayal3D
 //	    group = prev;
     }
     
+	@Override
 	public TransformGroup getModel(Object object, TransformGroup j3dModel)
 	{
 		Frisbee frisbee = (Frisbee)object;
@@ -95,7 +91,7 @@ public class FrisbeePortrayal3D extends SimplePortrayal3D
 		{
 			j3dModel = new TransformGroup();
 			j3dModel.setCapability(Group.ALLOW_CHILDREN_READ);
-			j3dModel.setCapability(Group.ALLOW_PICKABLE_READ);
+			j3dModel.setCapability(Node.ALLOW_PICKABLE_READ);
 			j3dModel.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 			try
 			{	
@@ -136,7 +132,7 @@ public class FrisbeePortrayal3D extends SimplePortrayal3D
 	BranchGroup createAxes()
     {
     BranchGroup temp = new BranchGroup();
-    temp.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
+    temp.setCapability(Group.ALLOW_CHILDREN_EXTEND);
     double arrowRadius = 0.01;
     temp.addChild(new Arrow(arrowRadius, new Double3D(0, 0, 0), new Double3D(1,0,0),"O"  , "X", null));
     temp.addChild(new Arrow(arrowRadius, new Double3D(0, 0, 0), new Double3D(0,1,0), null, "Y", null));
@@ -146,7 +142,7 @@ public class FrisbeePortrayal3D extends SimplePortrayal3D
 	BranchGroup createPhysicsArrows(Frisbee frisbee,BranchGroup bg)
 	{
 		BranchGroup temp = new BranchGroup();
-	    temp.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
+	    temp.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 	    temp.setCapability(BranchGroup.ALLOW_DETACH);
 	    double arrowRadius = 0.01;
 	    temp.addChild(new Arrow(arrowRadius, new Double3D(0, 0, 0), vToD3d(frisbee.getVelocity(),1), null  , "vel", null));

@@ -1,7 +1,9 @@
 package Ultimate;
 
 import java.awt.Color;
+
 import javax.vecmath.Vector3d;
+
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.util.Double2D;
@@ -28,6 +30,7 @@ public abstract class Player extends UltimateEntity implements Steppable {
 		return force;
 	}
 	
+	@Override
 	public void step( final SimState state )
 	{
 		Ultimate ultimate = (Ultimate)state;

@@ -1,18 +1,9 @@
 package visualization;
 
 import java.awt.Color;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-
-import sim.app.tutorial6.Tutorial6;
 import sim.field.grid.DoubleGrid2D;
 import sim.portrayal3d.grid.ValueGrid2DPortrayal3D;
-import sim.portrayal3d.grid.quad.MeshPortrayal;
 import sim.portrayal3d.grid.quad.TilePortrayal;
 import sim.util.gui.SimpleColorMap;
 

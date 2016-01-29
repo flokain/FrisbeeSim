@@ -2,18 +2,12 @@ package Ultimate;
 
 import java.awt.Color;
 
-import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
 
-import sim.app.keepaway.Entity;
 import sim.engine.SimState;
 import sim.engine.Steppable;
-import sim.portrayal.simple.OvalPortrayal2D;
-import sim.util.Bag;
 import sim.util.Double2D;
 import sim.util.Double3D;
-import sim.util.MutableDouble2D;
-
-import javax.vecmath.Vector3d;
 
 public abstract class UltimateEntity implements Steppable{
 
@@ -71,6 +65,7 @@ public abstract class UltimateEntity implements Steppable{
 		this(posi, 1.0, c);
 	}
 
+	@Override
 	public void step( final SimState state )
 	{
 		Ultimate ultimate = (Ultimate)state;

@@ -3,11 +3,11 @@ package visualization;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
-import Ultimate.UltimateEntity;
 import sim.portrayal.DrawInfo2D;
 import sim.portrayal.simple.CircledPortrayal2D;
 import sim.portrayal.simple.MovablePortrayal2D;
 import sim.portrayal.simple.OvalPortrayal2D;
+import Ultimate.UltimateEntity;
 
 public class UltimateEntityPortrayal2D extends MovablePortrayal2D{
 	

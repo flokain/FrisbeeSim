@@ -3,13 +3,9 @@ package Ultimate;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
-import sim.app.keepaway.Entity;
-
 import sim.portrayal.DrawInfo2D;
 import sim.portrayal.simple.RectanglePortrayal2D;
-import sim.util.Bag;
 import sim.util.Double2D;
-import sim.util.MutableDouble2D;
 
 public class FieldObject extends RectanglePortrayal2D{
 
@@ -28,6 +24,7 @@ public class FieldObject extends RectanglePortrayal2D{
 		this.size = new Double2D(w,h);
 	}
 
+	@Override
 	public void draw(Object object,  final Graphics2D g, final DrawInfo2D info )
     {    
     // draw our line as well

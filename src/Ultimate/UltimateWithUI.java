@@ -5,32 +5,32 @@
  */
 
 package Ultimate;
-import sim.engine.*;
-import sim.display.*;
+import java.awt.Color;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
+
+import javax.media.j3d.Shape3D;
+import javax.media.j3d.Transform3D;
+import javax.swing.JFrame;
+import javax.vecmath.Matrix3d;
+import javax.vecmath.Vector3d;
+
+import sim.display.Console;
+import sim.display.Controller;
+import sim.display.Display2D;
+import sim.display.GUIState;
 import sim.display3d.Display3D;
-import sim.portrayal.continuous.*;
+import sim.engine.SimState;
+import sim.portrayal.continuous.ContinuousPortrayal2D;
 import sim.portrayal.simple.RectanglePortrayal2D;
-import sim.portrayal3d.continuous.*;
-import sim.portrayal3d.grid.ValueGrid2DPortrayal3D;
+import sim.portrayal3d.continuous.ContinuousPortrayal3D;
 import sim.portrayal3d.grid.quad.TilePortrayal;
 import sim.portrayal3d.simple.CubePortrayal3D;
 import sim.portrayal3d.simple.Shape3DPortrayal3D;
 import sim.util.gui.SimpleColorMap;
-
-
-
 import visualization.FrisbeeFieldPortrayal3D;
 import visualization.FrisbeePortrayal3D;
 import visualization.UltimateEntityPortrayal2D;
-import visualization.UltimateEntityPortrayal3D;
-
-import java.awt.*;
-
-import javax.media.j3d.Shape3D;
-import javax.media.j3d.Transform3D;
-import javax.swing.*;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
 
 public class UltimateWithUI extends GUIState
 {

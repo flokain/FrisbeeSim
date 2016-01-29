@@ -46,13 +46,13 @@ public class FrisbeePhysics {
 	
 	
 	public FrisbeePhysics addAngularMomentum(Vector3d mo){
-		this.mo.add((Tuple3d)mo);
+		this.mo.add(mo);
 		return this;
 	}
 	
 	// add force  for wind or objects hitting the Frisbee
 	public FrisbeePhysics addForce(Vector3d force){
-		this.fo.add((Tuple3d)force);
+		this.fo.add(force);
 		return this;
 	}
 	

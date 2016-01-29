@@ -1,16 +1,14 @@
 package Ultimate;
-import java.awt.Color;
 import java.util.ArrayList;
 
 import javax.vecmath.Vector3d;
 
 import sim.engine.SimState;
-import sim.field.continuous.*;
+import sim.field.continuous.Continuous2D;
+import sim.field.continuous.Continuous3D;
 import sim.util.Bag;
 import sim.util.Double2D;
 import sim.util.Double3D;
-import sim.util.MutableDouble2D;
-import sim.engine.*;
 
 public class Ultimate extends SimState{
 	Continuous2D ultimateField2D;
@@ -55,6 +53,7 @@ public class Ultimate extends SimState{
 		positionsDefence = posiDefence;
 	}
 
+	@Override
 	public void start()
 	{
 		super.start();
