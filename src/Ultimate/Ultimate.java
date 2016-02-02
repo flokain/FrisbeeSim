@@ -37,7 +37,7 @@ public class Ultimate extends SimState{
 			positionsDefence.add(new Double2D((endzoneLength+(fieldLength-endzoneLength)*(i)/7 ), fieldWidth/2+2));
 		
 		positionDisc = new Double3D( ((Double2D)positionsOffence.get(0)).x+1,((Double2D)positionsOffence.get(0)).y+1,1);
-		
+		frisbee = new Frisbee(positionDisc);
 	}
 
 	public Ultimate(long seed, Bag posiOffence)
@@ -69,11 +69,6 @@ public class Ultimate extends SimState{
 		{
 			ultimateField2D.setObjectLocation(lines.get(i), lines.get(i).posi);
 		}
-		
-		String setup = "vertical";
-		switch (setup) {
-
-		case "vertical":
 			//init players
 			ArrayList<PlayerOffence> offence = new ArrayList<PlayerOffence>(7);
 			ArrayList<PlayerDefence> defence = new ArrayList<PlayerDefence>(7);
@@ -91,7 +86,7 @@ public class Ultimate extends SimState{
 				schedule.scheduleRepeating(defence.get(i));
 			}
 			//init Frisbee
-			Frisbee frisbee = new Frisbee(positionDisc);
+			frisbee = new Frisbee(positionDisc);
 			schedule.scheduleRepeating(frisbee);
 			//frisbee.location.add(new Vector3d(1,1,1));
 			//frisbee.location.set(0,0,1);
@@ -105,25 +100,21 @@ public class Ultimate extends SimState{
 
 			frisbee.throwDisc(velocity, angles, angleVelocity);
 			ultimateField2D.setObjectLocation(frisbee, new Double2D(frisbee.location.x,frisbee.location.y));
-			break;
-//			
-			case "throw":
-////			Double2D posiP = new Double2D((endzoneLength+(fieldLength-endzoneLength)/7 ), fieldWidth/2);
-////			ultimateField2D.setObjectLocation(new PlayerOffence(posiP),posiP);
-//			Vector3d posiF = new Vector3d((endzoneLength+(fieldLength-endzoneLength)/7), fieldWidth/3,0);
-//			Vector3d speedF = new Vector3d(14,0,0);
-//			double angleOfAttack = 2;
-//			
-//			//frisbee = new Frisbee(posiF,speedF,angleOfAttack);
-//			ultimateField2D.setObjectLocation(frisbee,new Double2D(posiF.x,posiF.y));
-//			schedule.scheduleRepeating(frisbee);
-		}
-
-
-		//		for ( int i = 0; i < positionsDefence.size();i++)
-		//			ultimateField2D.setObjectLocation(new PlayerDefence(), (Double2D)(positionsDefence.get(i)));
 	}
 
+	//setter and getter of this model
+	public Vector3d getDiscPosition() { return frisbee.location;}
+	public void setDiscPosition(Vector3d pos) {frisbee.location = pos;}
+	
+	public Vector3d getDiscVelocity() { return frisbee.velocity;}
+	public void setDiscVelocity(Vector3d velocity) {frisbee.velocity = velocity;}
+	
+	public Vector3d getDiscAngles() { return frisbee.angles;}
+	public void setDiscAngles(Vector3d angles) {frisbee.angles = angles;}
+	
+	public Vector3d getDiscOmega() { return frisbee.anglesd;}
+	public void setDiscOmega(Vector3d omega) {frisbee.anglesd = omega;}
+	
 	public static void main(String[] args)
 	{
 		doLoop(Ultimate.class, args);

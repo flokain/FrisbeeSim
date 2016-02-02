@@ -3,6 +3,8 @@ package Ultimate;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import differentialEquations.DifferentialEquation;
+import disc.physics.aerodynamics.FlightModel_HummelOriginal;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.util.Double2D;
@@ -10,6 +12,10 @@ import sim.util.Double3D;
 
 public class Frisbee extends UltimateEntity implements Steppable
 {
+	private static final long serialVersionUID = -277584315287176445L;
+	
+	FlightModel_HummelOriginal equation;
+	
 	Vector3d rotForce;
 	Vector3d rotAccel;
 	Vector3d rotVelocity; // in relation to the frisbee Frame (x',y',z')
@@ -56,6 +62,8 @@ public class Frisbee extends UltimateEntity implements Steppable
 	public Frisbee(Vector3d posi, Vector3d velocity, int Coeff) 
 	{
 		super( posi,velocity,new Vector3d(), 0.175, 0.134698416889272);
+		
+		equation = new FlightModel_HummelOriginal();
 		
 		rotForce = new Vector3d();
 		rotAccel = new Vector3d();
@@ -613,6 +621,14 @@ public class Frisbee extends UltimateEntity implements Steppable
 		Vector3d proj = new Vector3d(vec);
 		proj.sub(direc);
 		return proj;
+	}
+	private static class frisbeeDeWrapper extends FlightModel_HummelOriginal implements DifferentialEquation
+	{
+		@Override
+		public double[] calculate(double t, double[] y){
+			return super.calculate(t,y);
+	}
+		
 	}
 
 }

@@ -9,6 +9,7 @@ import sim.util.Double2D;
 
 public class FieldObject extends RectanglePortrayal2D{
 
+	private static final long serialVersionUID = 2371402856632016025L;
 	public Double2D posi;
 	public Double2D size;
 

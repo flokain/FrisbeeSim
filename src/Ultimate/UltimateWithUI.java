@@ -21,6 +21,7 @@ import sim.display.Display2D;
 import sim.display.GUIState;
 import sim.display3d.Display3D;
 import sim.engine.SimState;
+import sim.portrayal.Inspector;
 import sim.portrayal.continuous.ContinuousPortrayal2D;
 import sim.portrayal.simple.RectanglePortrayal2D;
 import sim.portrayal3d.continuous.ContinuousPortrayal3D;
@@ -53,6 +54,16 @@ public class UltimateWithUI extends GUIState
 
 	public UltimateWithUI() { super(new Ultimate(System.currentTimeMillis())); }
 	public UltimateWithUI(SimState state) { super(state); }
+	
+	//adds a model tab in the simulation for inspectors int the simState subclass Ultimate
+	public Object getSimulationInspectedObject() { return state; }
+	public Inspector getInspector()
+	{
+	Inspector i = super.getInspector();
+	i.setVolatile(true);
+	return i;
+	}
+	
 	public static String getName() { return "Ultimate"; }
 
 	//overriding the GuiStates standard functions

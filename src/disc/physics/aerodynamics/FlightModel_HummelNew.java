@@ -1,65 +1,38 @@
-package discPhysics;
+package disc.physics.aerodynamics;
+
+import java.io.IOException;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-public class FrisbeeDE{
+import disc.physics.Disc;
+import disc.physics.aerodynamics.FlyingDisc.flightCoefficientsType;
 
-	private Matrix3d inertiaTensor;
-	private double mass;
-	private double radius;
+public class FlightModel_HummelNew{
 	
-	private double g;  		//The acceleration of gravity (m/s^2).
-	private double RHO; 	//The density of air in kg/m^3.
-	private double AREA;	//The area of a standard frisbee.
-	private double CL0;		//The lift coefficient at alpha = 0.
-	private double CLA;		//The lift coefficient dependent on alpha.
-	private double CD0;		//The drag coefficent at alpha = 0.
-	private double CDA;		//The drag coefficient dependent on alpha.
-	private double ALPHA0;	// minimum drag and zero lift at ALPHA0 Hummel page 9
-	private double CRr;
-	private double CMO;
-	private double CMa;
-	private double CMq;
-	private double CRp;
-	private double CNr;
-	private double Ixy;
-	private double Iz;
+	private final FlyingDisc disc;
+	private final double g;  	//The acceleration of gravity (m/s^2).
+	private double RHO; 		//The density of air in kg/m^3.
 	
-	/* initialize Disc with Ultrastar data from Hummel. */
-	public FrisbeeDE(){
+	/* Parameters for the calculation
+	 * they only need to be calculated once and are intended to save computation time and
+	 * to make the code more readable.
+	 */
+	Matrix inverseInertia;
 	
-		inertiaTensor = new Matrix3d						// Frisbee is a symetrical object, the inertia around the x and y axis are the same
-			(	0.001219,			0,			0, 			// 0,0: Inertia on the x axis
-				0		,	 0.001219,			0,			// 1,1: Inertia on the y axis
-				0		,			0,	 0.002352	);		// 2,2: Inertia on the z axis	
-		mass =  0.175;
-		
-		g = 9.7935; 	
-	    RHO = 1.23;	
-		AREA = 0.057;
-		radius = Math.sqrt(AREA/Math.PI);
-		CL0 = 0.3331;	
-		CLA = 1.9124;
-		CD0 = 0.1769;
-		CDA = 0.685;	
-		ALPHA0 = -CL0/CLA;	
-		CRr = 0.00171;
-		CMO = -0.0821;
-		CMa = 0.4338;
-		CMq = -0.005;
-		CRp = -0.0055;
-		CNr = 0.0000071;
-		/* long flights:
-		CMq = -0.0144; 
-		CRp = -0.0125;
-		CNr = -0.0000341;
-		*/
-		Ixy = 0.001219;
-		Iz = 0.002352;
+	public FlightModel_HummelNew() throws IOException
+	{
+	   this(new FlyingDisc(flightCoefficientsType.HUMMEL_SHORT));
 	}
 	
-	//hummels version
+	public FlightModel_HummelNew(FlyingDisc disc)
+	{
+		this.disc = disc;
+	    RHO = 1.23;	
+		g = 9.7935;
+	}
+	
+	//Hummels Version
 	public Double[] calculate(double t,Double[] y)
 	{
 		double[] x = calculate(t,new double[]{ y[0].doubleValue(), y[1].doubleValue(), y[2].doubleValue(),
@@ -70,9 +43,9 @@ public class FrisbeeDE{
 		return new Double[] {x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10], x[11]};
 	}
 										// force on the frisbee
+	@SuppressWarnings("unused")
 	public double[] calculate(double t,double[] y) // the diffrential equation for y''= f(t,y,y')
 	{
-		@SuppressWarnings("unused")
 		Vector3d x = new Vector3d(y[0],y[1],y[2]); 				// position in global frame
 		Vector3d v = new Vector3d(y[3],y[4],y[5]); 				// velocity in x,y,z direction
 		Vector3d an = new Vector3d(y[6],y[7],y[8]); 			// angles orientation global frameprivate Vector3d dv; 				// accelaration in x,y,z direction
@@ -87,8 +60,8 @@ public class FrisbeeDE{
 		double fd = omega.x;
 		double thd = omega.y;
 		double gd = omega.z;
-		double Id = Ixy;
-		double Ia = Iz;
+		double Id = disc.inertia_XY;
+		double Ia = disc.inertia_Z;
 		double st = Math.sin(th);
 		double ct = Math.cos(th);
 		 
@@ -117,7 +90,7 @@ public class FrisbeeDE{
 		vp.sub(vc3c3);  //vp= [vel-vc3*c3]; Vector3d uvp = new Vector3d();
 		
 		double alpha = Math.atan(vc3/vp.length());
-		double  Adp = RHO*Math.pow(v.length(), 2)*AREA/2; //air resistance
+		double  Adp = RHO*Math.pow(v.length(), 2)*disc.area/2; //air resistance
 		Vector3d uvel = new Vector3d(vel);
 		uvel.normalize();
 		
@@ -138,12 +111,14 @@ public class FrisbeeDE{
 		
 		// double AdvR = radius*2*omegaspin/2/vel.length() ; not used
 		
-		double CL = CL0 + CLA*alpha; 
-		double alphaeq = -CL0/CLA;  // this is angle of attack at zero lift 
-		double CD = CD0 + CDA*(alpha-alphaeq)*(alpha-alphaeq); 
-		double CM=CMO + CMa*alpha; 
+		double CL = disc.cl[0] + disc.cl[1]*alpha; 
+		double alphaeq = -disc.cl[0]/disc.cl[1];  // this is angle of attack at zero lift 
+		double CD = disc.cd[0] + disc.cl[1]*(alpha-alphaeq)*(alpha-alphaeq); 
+		double CM=disc.ctau[0] + disc.ctau[1]*alpha; 
 		Vector3d mvp = new Vector3d(uvp);
-		mvp.scale(Adp*radius*2*(Math.sqrt(radius*2/g)*CRr*omegaspin +CRp*omegavp));
+		
+		double radius = Math.sqrt(disc.area / Math.PI);
+		mvp.scale(Adp*radius*2*(Math.sqrt(radius*2/g)*disc.Ctau.el[0].z*omegaspin +disc.Ctau.el[0].x*omegavp));
 		
 	    double lift = CL*Adp; 
 	    double drag = CD*Adp; 
@@ -161,18 +136,18 @@ public class FrisbeeDE{
 	   udrag.scale(drag);
 	   
 	   uearth.set(0, 0, 1);
-	   uearth.scale(mass*g);
+	   uearth.scale(disc.mass*g);
 
 		fo.add(ulift);
 		fo.add(udrag);
 		fo.add(uearth);
 		
 		Vector3d mlat = new Vector3d(ulat);
-		double pitch = Adp*radius*2* (CM + CMq*omegalat);
+		double pitch = Adp*radius*2* (CM + disc.Ctau.el[1].y*omegalat);
 		mlat.scale(pitch);
 		
 		Vector3d mspin = new Vector3d(0,0,1);
-		double spin = CNr*(omegaspin);
+		double spin = disc.Ctau.el[2].z*(omegaspin);
 		mspin.scale(spin);
 		
 		T_c_N.transpose();
@@ -185,7 +160,7 @@ public class FrisbeeDE{
 		m.add(mspin);
 		
 		Vector3d accel = new Vector3d(fo);
-		accel.scale(1/mass);
+		accel.scale(1/disc.mass);
 		
 		omegaD.x = (m.x + Id*thd*fd*st - Ia*thd*(fd*st+gd) +Id*thd*fd*st)/Id/ct +0.55e-16;
 		omegaD.y = (m.y + Ia*fd*ct*(fd*st +gd) - Id*fd*fd*ct*st)/Id;  
@@ -194,4 +169,5 @@ public class FrisbeeDE{
 		double[] ans = new double[]{v.x,v.y,v.z, accel.x, accel.y,accel.z, omega.x,omega.y,omega.z,omegaD.x,omegaD.y,omegaD.z};
 		return ans;
 	}
+	
 }
