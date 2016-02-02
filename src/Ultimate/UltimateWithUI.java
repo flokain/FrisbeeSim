@@ -8,6 +8,7 @@ package Ultimate;
 import java.awt.Color;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
+import java.io.IOException;
 
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.Transform3D;
@@ -45,14 +46,14 @@ public class UltimateWithUI extends GUIState
 	ContinuousPortrayal3D entityPortrayal3D = new ContinuousPortrayal3D();
     //ValueGrid2DPortrayal3D FieldPortrayal3D = new ValueGrid2DPortrayal3D("Field Projection");
     
-	public static void main(String[] args)
+	public static void main(String[] args) throws IOException
 	{
 		UltimateWithUI vid = new UltimateWithUI();
 		con = new Console(vid);
 		con.setVisible(true);
 	}
 
-	public UltimateWithUI() { super(new Ultimate(System.currentTimeMillis())); }
+	public UltimateWithUI() throws IOException { super(new Ultimate(System.currentTimeMillis())); }
 	public UltimateWithUI(SimState state) { super(state); }
 	
 	//adds a model tab in the simulation for inspectors int the simState subclass Ultimate

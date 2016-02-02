@@ -23,19 +23,24 @@ public class testWithRungeKuttaSolver {
 	public static void main(String[] args) throws IOException
 	{
 		double t_0 = 0;
-		double[] y_0 = new double[] {-9.03E-01, -6.33E-01, -9.13E-01,
+		double[] yHummelOriginal_0 = new double[] {-9.03E-01, -6.33E-01, -9.13E-01,
 									 1.34E+01,  -4.11E-01, 1.12E-03,
 									 -7.11E-02, 2.11E-01, 5.03E+00,
 									 -1.49E+01, -1.48E+00, 5.43E+01};
+		
+		double[] yHummelNew_0 = new double[] {-9.03E-01, -6.33E-01, -9.13E-01,
+										 -7.11E-02, 2.11E-01, 5.03E+00,
+										 1.34E+01,  -4.11E-01, 1.12E-03,
+										 -1.49E+01, -1.48E+00, 5.43E+01};
 		double stepSize = 0.00001;
-		double t_end = 0.2;
+		double t_end = 1;
 		
 		FlyingDisc disc = new FlyingDisc(flightCoefficientsType.HUMMEL_SHORT);
 		
 		
 		//instance DiscDeKain
 		FlightModel_Kain eqKain = new frisbeeDeKainWrapper(disc);
-		double[] yK_0 = eqKain.convertHummelToKainIvp(y_0).convert2Array();
+		double[] yK_0 = eqKain.convertHummelToKainIvp(yHummelOriginal_0).convert2Array();
 		DifferentialEquation equationKain   = (DifferentialEquation) eqKain;
 		
 		//instance DiscDeHummelOriginal
@@ -59,9 +64,9 @@ public class testWithRungeKuttaSolver {
 		ArrayList<InitialValueProblem> ivpList = new ArrayList<InitialValueProblem>();
 		
 
-		ivpList.add(new InitialValueProblem(equationHummelOriginal,y_0,t_0));
-		ivpList.add(new InitialValueProblem(equationKain,yK_0,t_0));
-		ivpList.add(new InitialValueProblem(equationHummelNew,y_0,t_0));
+		ivpList.add(new InitialValueProblem(equationHummelOriginal,yHummelOriginal_0,t_0));
+		//ivpList.add(new InitialValueProblem(equationKain,yK_0,t_0));
+		ivpList.add(new InitialValueProblem(equationHummelNew,yHummelNew_0,t_0));
 		
 		ArrayList<Solver> solverList = new ArrayList<Solver>();
 		solverList.add(ode45);
@@ -69,18 +74,23 @@ public class testWithRungeKuttaSolver {
 		
 		for( InitialValueProblem ivp : ivpList)
 		{
+			double time = System.currentTimeMillis();
+			ode45.setEquation(ivp.getEquation());
+			ode45.run(ivp.getY_0(), t_0, t_end);
+			double completedIn = System.currentTimeMillis() - time;
+			
+			System.out.println( "Computation Time for ode45 on " + ivp.getEquation().getClass().toString()
+							   +": "+ completedIn +" ms");
+			time = System.currentTimeMillis();
+			ode1.setEquation(ivp.getEquation());
+			ode1.run(ivp.getY_0(), t_0, t_end, stepSize);
+			completedIn = System.currentTimeMillis() - time;
+			
+			System.out.println( "Computation Time for ode45 on " + ivp.getEquation().getClass().toString()
+							   +": "+ completedIn +" ms");
+			
 			for (Solver solver : solverList)
 			{
-				double time = System.currentTimeMillis();
-				
-				solver.setEquation(ivp.getEquation());
-				solver.run(ivp.getY_0(), ivp.getT_0(), t_end);
-				double completedIn = System.currentTimeMillis() - time;
-				
-				System.out.println( "Computation Time for "+ solver.getClass().toString() 
-								   +" and " + ivp.getEquation().getClass().toString()
-								   +": "+ completedIn +" ms");
-				
 				time = System.currentTimeMillis();
 				
 				 Chart a = QuickChart.getChart("position", "t", "m",new String[]{"x","y","z"},solver.getT_values(),solver.getY_values(new int[]{0,1,2}));

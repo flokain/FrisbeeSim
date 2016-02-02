@@ -8,7 +8,7 @@ public class PlayerOffence extends Player
 {
 	public PlayerOffence( Double2D posi)
 	{
-		super(posi,Color.pink);
+		super(posi);
 	}
 	public void decide(){};
 	//

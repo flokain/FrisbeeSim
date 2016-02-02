@@ -10,6 +10,7 @@ import javax.media.j3d.Node;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.vecmath.Matrix3d;
+import javax.vecmath.Quat4d;
 import javax.vecmath.Vector3d;
 
 import sim.portrayal3d.SimplePortrayal3D;
@@ -105,13 +106,27 @@ public class FrisbeePortrayal3D extends SimplePortrayal3D
 			j3dModel.addChild(createPhysicsArrows(frisbee,arrows));
 		}
 		TransformGroup tgDiscOrient = (TransformGroup) j3dModel.getChild(0);
-		BranchGroup tgPhysicsArrows = (BranchGroup) j3dModel.getChild(1);
+		BranchGroup bgPhysicsArrows = (BranchGroup) j3dModel.getChild(1);
 		
-		tgDiscOrient.setTransform(new Transform3D(frisbee.getRotation(),new Vector3d(0,0,0),1));
-		tgPhysicsArrows.removeAllChildren();
-		createPhysicsArrows(frisbee,tgPhysicsArrows);
+		Matrix3d rot1 = new Matrix3d();
+		rot1.rotX(-frisbee.getOrientation().x);
+		Matrix3d rot2 = new Matrix3d();
+		rot2.rotY(-frisbee.getOrientation().y);
 		
-		j3dModel.setTransform(new Transform3D(new Matrix3d(1,0,0,0,1,0,0,0,1),frisbee.getLocation(),1));
+		Matrix3d orientationAsMatrix = new Matrix3d();
+		orientationAsMatrix.setIdentity();
+		orientationAsMatrix.mul(rot2);
+		orientationAsMatrix.mul(rot1);
+		orientationAsMatrix.transpose();
+		
+		Vector3d locationAsVector = new Vector3d(frisbee.getPosition().x,frisbee.getPosition().y,frisbee.getPosition().z);
+		
+		j3dModel.setTransform(new Transform3D(orientationAsMatrix ,locationAsVector,1));
+		
+		tgDiscOrient.setTransform(new Transform3D(orientationAsMatrix,new Vector3d(0,0,0),1));
+		bgPhysicsArrows.removeAllChildren();
+		createPhysicsArrows(frisbee,bgPhysicsArrows);
+		
 		
 		return j3dModel;
 	}
@@ -145,8 +160,8 @@ public class FrisbeePortrayal3D extends SimplePortrayal3D
 	    temp.setCapability(Group.ALLOW_CHILDREN_EXTEND);
 	    temp.setCapability(BranchGroup.ALLOW_DETACH);
 	    double arrowRadius = 0.01;
-	    temp.addChild(new Arrow(arrowRadius, new Double3D(0, 0, 0), vToD3d(frisbee.getVelocity(),1), null  , "vel", null));
-	    temp.addChild(new Arrow(arrowRadius, new Double3D(0, 0, 0), vToD3d(frisbee.getAccelaration(),1), null, "accel", null));
+	    temp.addChild(new Arrow(arrowRadius, new Double3D(0, 0, 0), new Double3D(frisbee.getVelocity()), null  , "vel", null));
+	    temp.addChild(new Arrow(arrowRadius, new Double3D(0, 0, 0), new Double3D(frisbee.getAcceleration()), null, "accel", null));
 	    bg.addChild(temp);
 	    return bg;
     }

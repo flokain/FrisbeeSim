@@ -3,26 +3,19 @@ package disc.physics.aerodynamics;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
-import disc.physics.Disc;
-
 public class FlightModel_HummelOriginal{
-
-	@SuppressWarnings("unused")
-	private Disc disc;
-	
-	private Matrix3d inertiaTensor;
-	private double mass;
-	private double radius;
 	
 	private double g;  		//The acceleration of gravity (m/s^2).
 	private double RHO; 	//The density of air in kg/m^3.
+	
+	private double mass;
+	private double radius;
 	private double AREA;	//The area of a standard frisbee.
+		
 	private double CL0;		//The lift coefficient at alpha = 0.
 	private double CLA;		//The lift coefficient dependent on alpha.
 	private double CD0;		//The drag coefficent at alpha = 0.
 	private double CDA;		//The drag coefficient dependent on alpha.
-	@SuppressWarnings("unused")
-	private double ALPHA0;	// minimum drag and zero lift at ALPHA0 Hummel page 9
 	private double CRr;
 	private double CMO;
 	private double CMa;
@@ -34,10 +27,6 @@ public class FlightModel_HummelOriginal{
 	
 	public FlightModel_HummelOriginal(){
 	
-		inertiaTensor = new Matrix3d						// Frisbee is a symetrical object, the inertia around the x and y axis are the same
-			(	0.001219,			0,			0, 			// 0,0: Inertia on the x axis
-				0		,	 0.001219,			0,			// 1,1: Inertia on the y axis
-				0		,			0,	 0.002352	);		// 2,2: Inertia on the z axis	
 		mass =  0.175;
 		
 		g = 9.7935; 	
@@ -48,7 +37,6 @@ public class FlightModel_HummelOriginal{
 		CLA = 1.9124;
 		CD0 = 0.1769;
 		CDA = 0.685;	
-		ALPHA0 = -CL0/CLA;	
 		CRr = 0.00171;
 		CMO = -0.0821;
 		CMa = 0.4338;
@@ -161,7 +149,7 @@ public class FlightModel_HummelOriginal{
 	    ulift.negate();
 	    ulift.scale(lift);
 	    
-	    udrag = uvel;
+	    udrag = new Vector3d(uvel);
 	    udrag.negate();
 	   udrag.scale(drag);
 	   
@@ -199,5 +187,4 @@ public class FlightModel_HummelOriginal{
 		double[] ans = new double[]{v.x,v.y,v.z, accel.x, accel.y,accel.z, omega.x,omega.y,omega.z,omegaD.x,omegaD.y,omegaD.z};
 		return ans;
 	}
-	
 }

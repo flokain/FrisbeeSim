@@ -1,7 +1,6 @@
 package Ultimate;
+import java.io.IOException;
 import java.util.ArrayList;
-
-import javax.vecmath.Vector3d;
 
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
@@ -9,6 +8,7 @@ import sim.field.continuous.Continuous3D;
 import sim.util.Bag;
 import sim.util.Double2D;
 import sim.util.Double3D;
+import sim.util.MutableDouble3D;
 
 public class Ultimate extends SimState{
 	Continuous2D ultimateField2D;
@@ -22,7 +22,7 @@ public class Ultimate extends SimState{
 	Frisbee frisbee;
 	Double3D positionDisc;
 
-	public Ultimate(long seed)
+	public Ultimate(long seed) throws IOException
 	{		
 		super(seed); 			
 		positionsOffence = new Bag();
@@ -86,34 +86,33 @@ public class Ultimate extends SimState{
 				schedule.scheduleRepeating(defence.get(i));
 			}
 			//init Frisbee
-			frisbee = new Frisbee(positionDisc);
 			schedule.scheduleRepeating(frisbee);
-			//frisbee.location.add(new Vector3d(1,1,1));
+			//frisbee.location.add(new Double3D(1,1,1));
 			//frisbee.location.set(0,0,1);
-//			Vector3d velocity = new Vector3d(13.42,-.41,0.001);
-//			Vector3d angles = new Vector3d(-0.07,0.21,5.03);
-//			Vector3d angleVelocity = new Vector3d(-14.94,-1.48,54.25);
+//			Double3D velocity = new Double3D(13.42,-.41,0.001);
+//			Double3D angles = new Double3D(-0.07,0.21,5.03);
+//			Double3D angleVelocity = new Double3D(-14.94,-1.48,54.25);
 			
-			Vector3d velocity = new Vector3d(50,0,0);
-			Vector3d angles = new Vector3d(0,0.08,0.00);//rad
-			Vector3d angleVelocity = new Vector3d(0,0,50);
+			Double3D velocity = new Double3D(50,0,0);
+			Double3D orientation = new Double3D(0,0.08,0.00);//rad
+			Double3D omega = new Double3D(0,0,50);
 
-			frisbee.throwDisc(velocity, angles, angleVelocity);
-			ultimateField2D.setObjectLocation(frisbee, new Double2D(frisbee.location.x,frisbee.location.y));
+			frisbee.throwDisc(velocity, orientation, omega);
+			ultimateField2D.setObjectLocation(frisbee, new Double2D(frisbee.position.x,frisbee.position.y));
 	}
 
 	//setter and getter of this model
-	public Vector3d getDiscPosition() { return frisbee.location;}
-	public void setDiscPosition(Vector3d pos) {frisbee.location = pos;}
+	public MutableDouble3D getDiscPosition() { return frisbee.position;}
+	public void setDiscPosition(Double3D pos) {frisbee.position.setTo(pos);}
 	
-	public Vector3d getDiscVelocity() { return frisbee.velocity;}
-	public void setDiscVelocity(Vector3d velocity) {frisbee.velocity = velocity;}
+	public MutableDouble3D MutableDouble3D() { return frisbee.velocity;}
+	public void setDiscVelocity(Double3D velocity) {frisbee.velocity.setTo(velocity);}
 	
-	public Vector3d getDiscAngles() { return frisbee.angles;}
-	public void setDiscAngles(Vector3d angles) {frisbee.angles = angles;}
+	public MutableDouble3D getDiscOrientation() { return frisbee.orientation;}
+	public void setDiscOrientation(Double3D angles) {frisbee.orientation.setTo(angles);}
 	
-	public Vector3d getDiscOmega() { return frisbee.anglesd;}
-	public void setDiscOmega(Vector3d omega) {frisbee.anglesd = omega;}
+	public MutableDouble3D getDiscOmega() { return frisbee.omega;}
+	public void setDiscOmega(Double3D omega) {frisbee.omega.setTo(omega);}
 	
 	public static void main(String[] args)
 	{

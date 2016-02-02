@@ -8,7 +8,7 @@ public class PlayerDefence extends Player
 {
 	public PlayerDefence( Double2D posi)
 	{
-		super(posi,Color.BLUE);
+		super(posi);
 	}
 
 }
