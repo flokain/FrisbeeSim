@@ -1,177 +1,128 @@
 package Ultimate;
 
 import java.awt.Color;
+import java.lang.annotation.Inherited;
 
-import javax.vecmath.Matrix3d;
-
-import sim.app.keepaway.Entity;
 import sim.engine.SimState;
 import sim.engine.Steppable;
-import sim.portrayal.simple.OvalPortrayal2D;
-import sim.util.Bag;
 import sim.util.Double2D;
 import sim.util.Double3D;
-import sim.util.MutableDouble2D;
-
-import javax.vecmath.Vector3d;
+import sim.util.MutableDouble3D;
 
 public abstract class UltimateEntity implements Steppable{
 
-	double mass; 	// mass of the object
-	public Vector3d location;
-	public Vector3d orientation; 
-	public Vector3d velocity;
-	public Vector3d bump;
+	protected double mass; 
+	protected double radius; // all elements are considerd to be balls or tubes for visualization
 	
-	public Vector3d force = new Vector3d();
-	public Vector3d accel = new Vector3d();
-	public Vector3d newLoc = new Vector3d();
-	public Vector3d sumVector = new Vector3d();
-	public double radius; // for visualization
-	public double cap;
+	protected MutableDouble3D position;
+	protected MutableDouble3D orientation; 
+	protected MutableDouble3D omega;			// angular velocity
+	protected MutableDouble3D velocity;
+	protected MutableDouble3D acceleration;
+	protected MutableDouble3D alpha;
 	
-	// Accessors for inspector
-	public double getX() { return location.x; }
-	public void setX( double newX ) { location.x = newX; }
-
-	public double getY() { return location.y; }
-	public void setY( double newY ) { location.y = newY; }
-	public double getZ() { return location.z; }
-	public void setZ( double newZ ) { location.z = newZ; }
-
-	public double getVelocityX() { return velocity.x; }
-	public void setVelocityX( double newX ) { velocity.x = newX; }
-
-	public double getVelocityY() { return velocity.y; }
-	public void setVelocityY( double newY ) { velocity.y = newY; }
-
-	public double getVelocityZ() { return velocity.z; }
-	public void setVelocityZ( double newZ ) { velocity.z = newZ; }
-	
-	public double getAccelarationX() { return accel.x; }
-	public void setAccelarationX( double newX ) { accel.x = newX; }
-	
-	public double getAccelarationZ() { return accel.z; }
-	public void setAccelarationZ( double newZ ) { accel.z = newZ; }
-
-	public double getAccelarationY() { return accel.y; }
-	public void setAccelarationY( double newY ) { accel.y = newY; }	
-
-	public double getRadius() { return radius; }
-	
-	public double getZigZag(){return radius;}
-	
-	public void setRadius( double newRadius ) 
-	{
-		radius = newRadius;
-	} 
-
-	public double getMass() { return mass; }
-	public void setMass( double newMass ) { mass = newMass; } 
-
-	// Constructor
-	public UltimateEntity( Vector3d posi, Vector3d orientation, Vector3d velocity,Vector3d accel, double mass, double radius)
-	{
-		location = new Vector3d(posi); 
-		this.orientation = new Vector3d(orientation);
-		this.velocity = new Vector3d(velocity);
-		bump = new Vector3d();
-		this.accel =  new Vector3d(accel);
-		this.radius = radius;
-		this.mass = mass;
-		cap = 1.0;
+	// Getter and Setter, important for inspector in Mason
+	public double getMass() {
+		return mass;
 	}
-	public UltimateEntity( Vector3d posi, Vector3d velocity,Vector3d accel, double mass, double radius)
-	{
-		this(posi, new Vector3d(0,0,1), velocity, accel, mass, radius);
+	public double getRadius() {
+		return radius;
 	}
-	public UltimateEntity( Double2D posi, Double2D orientation, Double2D velocity, Double2D accel, double mass, double radius)
-	{
-		this( new Vector3d(posi.x,posi.y,0), new Vector3d(orientation.x,orientation.y,0), new Vector3d(velocity.x,velocity.y,0), new Vector3d(accel.x,accel.y,0), mass, radius);
+	
+	public MutableDouble3D getPosition() {
+		return position;
 	}
-	public UltimateEntity( Double2D posi, Double2D velocity, Double2D accel, double mass, double radius)
-	{
-		this( new Vector3d(posi.x,posi.y,0), new Vector3d(1,0,0), new Vector3d(velocity.x,velocity.y,0), new Vector3d(accel.x,accel.y,0), mass, radius);
+	public MutableDouble3D getOrientation() {
+		return orientation;
 	}
-	public UltimateEntity(Double2D posi, double mass, double radius){
+	public MutableDouble3D getOmega() {
+		return omega;
+	}
+	public MutableDouble3D getVelocity() {
+		return velocity;
+	}
+	public MutableDouble3D getAcceleration() {
+		return acceleration;
+	}
+	public MutableDouble3D getAlpha() {
+		return alpha;
+	}
+	// Constructors
+	public UltimateEntity( Double3D posi, Double3D orientation, Double3D velocity,Double3D omega, double mass, double radius)
+	{
+		position 		 = 	new MutableDouble3D(posi); 
+		this.orientation = 	new MutableDouble3D(orientation);
+		this.velocity 	 = 	new MutableDouble3D(velocity);
+		this.omega 		 =  new MutableDouble3D(omega);
+		this.radius 	 =	radius;
+		this.mass 		 =	mass;
+		this.acceleration= new MutableDouble3D();
+		this.alpha		 = new MutableDouble3D();
+	}
+	public UltimateEntity( Double3D posi, Double3D velocity, double mass, double radius)
+	{
+		this(posi, new Double3D(0,0,0), velocity, new Double3D(0,0,0), mass, radius);
+	}
+	public UltimateEntity( Double2D posi, Double2D velocity, double mass, double radius)
+	{
+		this(posi,new Double2D(0,0), velocity, mass, radius);
+	}
+	public UltimateEntity( Double2D posi, Double2D orientation, Double2D velocity, double mass, double radius)
+	{
+		this( new Double3D(posi.x,posi.y,0), new Double3D(orientation.x,orientation.y,0), new Double3D(velocity.x,velocity.y,0), new Double3D(0,0,0), mass, radius);
+	}
+	public UltimateEntity( Double2D posi, double mass, double radius){
 		this(  posi,new Double2D(0,0),new Double2D(0,0), mass, radius);	
 	}
-
-	public UltimateEntity( Double2D posi, double radius, Color c )
+	public UltimateEntity( Double2D posi, double radius)
 	{
 		this( posi,new Double2D(0,0),new Double2D(0,0),1.0, radius);
 	}
-	public UltimateEntity( Double2D posi, Color c)
-	{
-		this(posi, 1.0, c);
-	}
-
-	public boolean isValidMove( final Ultimate ultimate, final Vector3d newLoc)
-	{
-		Bag objs = ultimate.ultimateField.getObjectsWithinDistance(new Double2D(location.x, location.y), 10);
-
-		double dist = 0;
-
-		// check objects
-		for(int x=0; x<objs.numObjs; x++)
-		{
-			if(objs.objs[x] != this)
-			{
-				Vector3d tmp = new Vector3d(((UltimateEntity)objs.objs[x]).location);
-				tmp.sub(newLoc);
-				dist = tmp.length();
-
-				if((((UltimateEntity)objs.objs[x]).radius + radius) > dist)  // collision!
-					return false;
-			}
+	public UltimateEntity( Double2D posi) 				
+	{ 
+		this(posi, 1.0); 
 		}
 
-		// check walls
-		if(newLoc.x > ultimate.fieldLength)
-		{
-			if (velocity.x > 0) velocity.x = -velocity.x;
-			return false;
-		}
-		else if(newLoc.x < 0)
-		{
-			if (velocity.x < 0) velocity.x = -velocity.x;
-			return false;
-		}
-		else if(newLoc.y > ultimate.fieldWidth)
-		{
-			if (velocity.y > 0) velocity.y = -velocity.y;
-			return false;
-		}
-		else if(newLoc.y < 0)
-		{
-			if (velocity.y < 0) velocity.y = -velocity.y;
-			return false;
-		}
-
-		// no collisions: return, fool
-		return true;
-	}
-
-	public void capVelocity()
-	{
-		if(velocity.length() > cap)
-			velocity.normalize();
-			velocity.scale(cap);
-	}
-	// one step is a thousand of a second
 	
+	// override these functions!
+	
+	public UltimateEntity(Double3D position) {
+		// TODO Auto-generated constructor stub
+	}
+	public AccelerationsContainer calcAccelerations(Ultimate ultimate) // calculation of acceleration
+	{
+		return null; 
+	}
+	@Override
 	public void step( final SimState state )
 	{
 		Ultimate ultimate = (Ultimate)state;
 		
-		accel.scale(1/mass,force);
-		accel.scale(ultimate.stepTime); // one step is a thousand of a second
+		double h = ultimate.stepTime;
 		
-		velocity.add(accel);
-		Vector3d deltaVelocity = new Vector3d(velocity);
-		deltaVelocity.scale(ultimate.stepTime);
-		location.add(deltaVelocity);  // resets newLoc
-
-		ultimate.ultimateField.setObjectLocation(this,new Double2D(location.x, location.y)); //set the loaction
+		AccelerationsContainer container = calcAccelerations(ultimate);
+		acceleration.setTo(container.acceleration);
+		alpha.setTo(container.alpha);
+				
+		position.addIn(new Double3D(velocity).multiply(h));
+		velocity.addIn(new Double3D(container.acceleration).multiply(h));
+		
+		orientation.addIn(new Double3D(omega).multiply(h));
+		omega.addIn(new Double3D(container.alpha).multiply(h));
+		
+		ultimate.ultimateField2D.setObjectLocation(this,new Double2D(position.x, position.y)); 				//set the location in 2d portrayal
+		ultimate.ultimateField3D.setObjectLocation(this,new Double3D(position.x,position.y,position.z)); 	//set the location in 3d portrayal
+	}
+	
+	protected class AccelerationsContainer
+	{
+		Double3D acceleration;
+		Double3D alpha;
+		
+		public AccelerationsContainer(Double3D acceleration, Double3D alpha) 
+		{
+			this.acceleration = acceleration;
+			this.alpha = alpha;
+		}
 	}
 }
