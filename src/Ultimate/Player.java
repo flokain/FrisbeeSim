@@ -1,10 +1,13 @@
 package Ultimate;
 
 import java.awt.Color;
+
 import javax.vecmath.Vector3d;
+
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.util.Double2D;
+import sim.util.Double3D;
 import sim.util.MutableDouble2D;
 
 public abstract class Player extends UltimateEntity implements Steppable {
@@ -14,27 +17,24 @@ public abstract class Player extends UltimateEntity implements Steppable {
 	double armPower;	// maximum amount of energy applied per second to throw. (max accelaration)
 	public MutableDouble2D tempVector = new MutableDouble2D();
 	
-	public Player( Double2D posi, Color c)
+	public Player( Double2D posi)
 	{
-		super(posi,0.5,c);
+		super(posi,0.5);
 	}
-
-	public Vector3d getForces( final Ultimate ultimate)
+	
+	@Override
+	public AccelerationsContainer calcAccelerations(Ultimate ultimate)
 	{	
 		double x= ultimate.random.nextDouble()-0.5;
 		double y= ultimate.random.nextDouble()-0.5;
 		double z= ultimate.random.nextDouble()-0.5;
-		Vector3d force = new Vector3d(x,y,z);
-		return force;
-	}
-	
-	public void step( final SimState state )
-	{
-		Ultimate ultimate = (Ultimate)state;
-		// get force
-		force = getForces(ultimate);
-		super.step(state);
-//		ultimate.ultimateField.setObjectLocation(this, new Double2D(loc));
-	}
+		Double3D acceleration = new Double3D(x,y,z);
 
+		double theta = ultimate.random.nextDouble()-0.5;
+		double phi   = ultimate.random.nextDouble()-0.5;
+		double gamma = ultimate.random.nextDouble()-0.5;
+		Double3D alpha = new Double3D(theta,phi,gamma);
+		
+		return new AccelerationsContainer(acceleration,alpha);
+	}
 }
