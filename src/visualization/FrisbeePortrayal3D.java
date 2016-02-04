@@ -41,25 +41,17 @@ public class FrisbeePortrayal3D extends SimplePortrayal3D
 			Arrow omegaArrow;
 			Arrow accelerationArrow;
 			Arrow alphaArrow;
-			
-
 
 	/** Constructs a FrisbeePortrayal3D with a default (flat opaque white) appearance and a scale of 1.0. */
     public FrisbeePortrayal3D()
         {
 	    	super();
     		bgTop = new BranchGroup();
-    		bgTop.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
     			tgFrisbee = new TransformGroup();
-    			tgFrisbee.setCapability(TransformGroup.ALLOW_CHILDREN_READ);
     			tgFrisbee.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-    			 	bgFrisbeeModel = new BranchGroup();
-    			 	bgFrisbeeModel.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
 				bgPhysics = new BranchGroup();
-				//bgPhysics.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
 				
 			bgTop.addChild(tgFrisbee);
-				tgFrisbee.addChild(bgFrisbeeModel);
 			bgTop.addChild(bgPhysics);
 				bgPhysics.addChild(velocityArrow);
 				bgPhysics.addChild(omegaArrow);
@@ -76,18 +68,17 @@ public class FrisbeePortrayal3D extends SimplePortrayal3D
 		{
 			try
 			{	
-				tgFrisbee = loadModel(frisbee);
+				bgFrisbeeModel  = loadModel(frisbee);
+				tgFrisbee.addChild(bgFrisbeeModel);
 			}
 			catch (java.io.FileNotFoundException ex){}
 			prev = new TransformGroup();
 			prev.setCapability(Group.ALLOW_CHILDREN_READ);
 			prev.addChild(bgTop);
-			bgFrisbeeModel.addChild(new ColorCube(0.01));
 			
 			//set facets of the disc pickable.
-			LocationWrapper wrapper = new LocationWrapper(object, null, getCurrentFieldPortrayal());
-			bgFrisbeeModel.setUserData(wrapper);
-			setPickable(bgFrisbeeModel);
+			setPickable(frisbee, bgFrisbeeModel);
+			
 			
 		}
 		
@@ -102,29 +93,22 @@ public class FrisbeePortrayal3D extends SimplePortrayal3D
 		orientationAsMatrix.mul(rot1);
 		orientationAsMatrix.transpose();
 		
-		//Vector3d locationAsVector = new Vector3d(frisbee.getPosition().x,frisbee.getPosition().y,frisbee.getPosition().z);
-		
 		tgFrisbee.setTransform(new Transform3D(orientationAsMatrix, new Vector3d(),1));
 		velocityArrow = new Arrow( frisbee.getVelocity(), "Velocity", Color.YELLOW);
 		omegaArrow = new Arrow( frisbee.getOmega(), "Omega", Color.YELLOW);
 		accelerationArrow = new Arrow( frisbee.getAcceleration(), "Acceleration", Color.BLUE);
 		alphaArrow = new Arrow( frisbee.getAlpha(), "Alpha", Color.BLUE);
-		
 		return prev;
 	}
 	
-	TransformGroup loadModel(Frisbee frisbee) throws java.io.FileNotFoundException
+	private BranchGroup loadModel(Frisbee frisbee) throws java.io.FileNotFoundException
 	{
-			TransformGroup tg = new TransformGroup();
-			tg.setCapability(Group.ALLOW_CHILDREN_READ);
-			tg.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 			Scene s = null;
 		   	ObjectFile f = new ObjectFile ();
 		    f.setFlags(ObjectFile.TRIANGULATE | ObjectFile.STRIPIFY);
 			String s1 = "3dmodels\\frisbee.obj";
 			s = f.load(s1);
-			tg.addChild(s.getSceneGroup());
-			return tg;
+			return s.getSceneGroup();
 	}
 	BranchGroup createAxes()
     {
@@ -163,17 +147,19 @@ public class FrisbeePortrayal3D extends SimplePortrayal3D
 		}
 		
 	}
-	public void setPickable(Node node)
+	public void setPickable(Object object,Node node)
 	{
 		if (node instanceof Group)
 		{
 			for (Enumeration<Node> childNodes = ((Group)node).getAllChildren(); childNodes.hasMoreElements();)
 			{
-				setPickable(childNodes.nextElement());
+				setPickable(object, childNodes.nextElement());
 			}
 		}
 		else if (node instanceof Shape3D)
 		{
+			LocationWrapper wrapper = new LocationWrapper(object, null, getCurrentFieldPortrayal());
+			node.setUserData(wrapper);
 			setPickableFlags((Shape3D)node);
 		}
 	}
