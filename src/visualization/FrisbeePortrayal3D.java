@@ -2,7 +2,11 @@ package visualization;
 
 import java.awt.Color;
 import java.awt.Image;
+import java.io.FileNotFoundException;
 import java.util.Enumeration;
+
+
+
 
 
 import javax.media.j3d.Appearance;
@@ -23,9 +27,12 @@ import javax.vecmath.Vector3d;
 import sim.portrayal.LocationWrapper;
 import sim.portrayal3d.SimplePortrayal3D;
 import sim.portrayal3d.simple.Arrow;
+import sim.portrayal3d.simple.BranchGroupPortrayal3D;
 import sim.util.Double3D;
 import Ultimate.Frisbee;
 
+import com.sun.j3d.loaders.IncorrectFormatException;
+import com.sun.j3d.loaders.ParsingErrorException;
 import com.sun.j3d.loaders.Scene;
 import com.sun.j3d.loaders.objectfile.ObjectFile;
 import com.sun.j3d.utils.geometry.ColorCube;
@@ -49,9 +56,11 @@ public class FrisbeePortrayal3D extends SimplePortrayal3D
     		bgTop = new BranchGroup();
     			tgFrisbee = new TransformGroup();
     			tgFrisbee.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+    				bgFrisbeeModel = loadModel();
 				bgPhysics = new BranchGroup();
 				
 			bgTop.addChild(tgFrisbee);
+				tgFrisbee.addChild(bgFrisbeeModel);
 			bgTop.addChild(bgPhysics);
 				bgPhysics.addChild(velocityArrow);
 				bgPhysics.addChild(omegaArrow);
@@ -63,21 +72,15 @@ public class FrisbeePortrayal3D extends SimplePortrayal3D
 	public TransformGroup getModel(Object object, TransformGroup prev)
 	{
 		Frisbee frisbee = (Frisbee)object;
-
+		
 		if (prev == null)
 		{
-			try
-			{	
-				bgFrisbeeModel  = loadModel(frisbee);
-				tgFrisbee.addChild(bgFrisbeeModel);
-			}
-			catch (java.io.FileNotFoundException ex){}
 			prev = new TransformGroup();
 			prev.setCapability(Group.ALLOW_CHILDREN_READ);
 			prev.addChild(bgTop);
-			
 			//set facets of the disc pickable.
-			setPickable(frisbee, bgFrisbeeModel);
+			bgFrisbeeModel.setPickable(true);
+			//setPickable(frisbee, bgFrisbeeModel);
 			
 			
 		}
@@ -101,13 +104,18 @@ public class FrisbeePortrayal3D extends SimplePortrayal3D
 		return prev;
 	}
 	
-	private BranchGroup loadModel(Frisbee frisbee) throws java.io.FileNotFoundException
+	private BranchGroup loadModel()
 	{
 			Scene s = null;
 		   	ObjectFile f = new ObjectFile ();
 		    f.setFlags(ObjectFile.TRIANGULATE | ObjectFile.STRIPIFY);
 			String s1 = "3dmodels\\frisbee.obj";
-			s = f.load(s1);
+			try {
+				s = f.load(s1);
+			} catch (FileNotFoundException | IncorrectFormatException
+					| ParsingErrorException e) {
+				e.printStackTrace();
+			}
 			return s.getSceneGroup();
 	}
 	BranchGroup createAxes()

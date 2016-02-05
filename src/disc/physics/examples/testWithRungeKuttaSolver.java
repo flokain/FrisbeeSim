@@ -74,20 +74,28 @@ public class testWithRungeKuttaSolver {
 		
 		for( InitialValueProblem ivp : ivpList)
 		{
-			double time = System.currentTimeMillis();
 			ode45.setEquation(ivp.getEquation());
-			ode45.run(ivp.getY_0(), t_0, t_end);
+			
+			double time = System.currentTimeMillis();
+			ode45.run(ivp.getY_0(), t_0, t_end,1e-16,1e-3,0.8,2);
 			double completedIn = System.currentTimeMillis() - time;
 			
 			System.out.println( "Computation Time for ode45 on " + ivp.getEquation().getClass().toString()
 							   +": "+ completedIn +" ms");
-			time = System.currentTimeMillis();
 			ode1.setEquation(ivp.getEquation());
+			time = System.currentTimeMillis();
 			ode1.run(ivp.getY_0(), t_0, t_end, stepSize);
 			completedIn = System.currentTimeMillis() - time;
 			
-			System.out.println( "Computation Time for ode45 on " + ivp.getEquation().getClass().toString()
+			System.out.println( "Computation Time for ode1 on " + ivp.getEquation().getClass().toString()
 							   +": "+ completedIn +" ms");
+			
+			double[][] values1 = ode1.getY_values();
+			double lastV1 = values1[values1.length-1][0];//values1[0].length-2];
+			double[][] values45 = ode45.getY_values();
+			double lastV45 = values45[values45.length-1][0];//values1[0].length-2];
+			
+			System.out.println( "solutiondifference " + (lastV1-lastV45));
 			
 			for (Solver solver : solverList)
 			{

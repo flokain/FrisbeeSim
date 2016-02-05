@@ -4,18 +4,28 @@
   See the file "LICENSE" for more information
  */
 
-package Ultimate;
+package visualization;
 import java.awt.Color;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.Transform3D;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import Ultimate.FieldObject;
+import Ultimate.Frisbee;
+import Ultimate.PlayerDefence;
+import Ultimate.PlayerOffence;
+import Ultimate.Ultimate;
 import sim.display.Console;
 import sim.display.Controller;
 import sim.display.Display2D;
@@ -29,10 +39,8 @@ import sim.portrayal3d.continuous.ContinuousPortrayal3D;
 import sim.portrayal3d.grid.quad.TilePortrayal;
 import sim.portrayal3d.simple.CubePortrayal3D;
 import sim.portrayal3d.simple.Shape3DPortrayal3D;
+import sim.util.Double3D;
 import sim.util.gui.SimpleColorMap;
-import visualization.FrisbeeFieldPortrayal3D;
-import visualization.FrisbeePortrayal3D;
-import visualization.UltimateEntityPortrayal2D;
 
 public class UltimateWithUI extends GUIState
 {
@@ -50,7 +58,31 @@ public class UltimateWithUI extends GUIState
 	{
 		UltimateWithUI vid = new UltimateWithUI();
 		con = new Console(vid);
+		
 		con.setVisible(true);
+		
+	    // Buttons
+		JPanel pnlButton = new JPanel();
+	    JButton button = new JButton("Fly!");
+	    
+	    pnlButton.add(button);
+	    
+	    button.addActionListener( new ActionListener() 
+	    {
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				Ultimate ultimate = (Ultimate)con.getSimulation().state;			
+				
+				Double3D orientation = new Double3D(-7.11E-02, 2.11E-01, 5.03E+00);//rad
+				Double3D velocity = new Double3D(1.34E+01,  -4.11E-01, 1.12E-03);
+				Double3D omega = new Double3D(-1.49E+01, -1.48E+00, 5.43E+01);		
+				
+				ultimate.frisbee.throwDisc(velocity, orientation, omega);
+			}
+		});
+	    
+	    con.getTabPane().addTab("Commands",pnlButton);
 	}
 
 	public UltimateWithUI() throws IOException { super(new Ultimate(System.currentTimeMillis())); }
@@ -96,6 +128,8 @@ public class UltimateWithUI extends GUIState
 	{
 		super.init(c);
 		
+		
+		
 		// Make the Display2D
 		double scale = 1;
 		display2D = new Display2D(100*scale,37*scale,this); 
@@ -112,6 +146,7 @@ public class UltimateWithUI extends GUIState
 		
 		// Make the Display3D
 		display3D = new Display3D(900,500,this);
+		display3D.setBackdrop((new ImageIcon("images/horizon.jpg")).getImage(), true);
 		
 		// add the portrayal3ds of players disc and the playingfield to the display
         //display3D.attach(new WireFrameBoxPortrayal3D(-0.3, -0.3, -0.0, 0.3, 0.3, 10), "Bounds");

@@ -29,23 +29,23 @@ public abstract class UltimateEntity implements Steppable{
 		return radius;
 	}
 	
-	public MutableDouble3D getPosition() {
-		return position;
+	public Double3D getPosition() {
+		return new Double3D(position);
 	}
-	public MutableDouble3D getOrientation() {
-		return orientation;
+	public Double3D getOrientation() {
+		return new Double3D(orientation);
 	}
-	public MutableDouble3D getOmega() {
-		return omega;
+	public Double3D getOmega() {
+		return new Double3D(omega);
 	}
-	public MutableDouble3D getVelocity() {
-		return velocity;
+	public Double3D getVelocity() {
+		return new Double3D(velocity);
 	}
-	public MutableDouble3D getAcceleration() {
-		return acceleration;
+	public Double3D getAcceleration() {
+		return new Double3D(acceleration);
 	}
-	public MutableDouble3D getAlpha() {
-		return alpha;
+	public Double3D getAlpha() {
+		return new Double3D(alpha);
 	}
 	// Constructors
 	public UltimateEntity( Double3D posi, Double3D orientation, Double3D velocity,Double3D omega, double mass, double radius)
@@ -56,8 +56,8 @@ public abstract class UltimateEntity implements Steppable{
 		this.omega 		 =  new MutableDouble3D(omega);
 		this.radius 	 =	radius;
 		this.mass 		 =	mass;
-		this.acceleration= new MutableDouble3D();
-		this.alpha		 = new MutableDouble3D();
+		this.acceleration= new MutableDouble3D(0,0,0);
+		this.alpha		 = new MutableDouble3D(0,0,0);
 	}
 	public UltimateEntity( Double3D posi, Double3D velocity, double mass, double radius)
 	{

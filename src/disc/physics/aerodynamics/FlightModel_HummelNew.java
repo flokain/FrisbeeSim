@@ -85,17 +85,18 @@ public class FlightModel_HummelNew{
 		vc3c3.scale(vc3);
 		vp.sub(vc3c3);  //vp= [vel-vc3*c3]; Vector3d uvp = new Vector3d();
 		
-		double alpha = Math.atan(vc3/vp.length());
+		double alpha = (vp.length() == 0) ? 0:Math.atan(vc3/vp.length());
+
 		double  Adp = RHO*Math.pow(v.length(), 2)*disc.area/2; //air resistance
 		Vector3d uvel = new Vector3d(vel);
-		uvel.normalize();
+		if (uvel.length() > 0) uvel.normalize();
 		
 		Vector3d uvp = new Vector3d(vp);
-		uvp.normalize();
+		if(uvp.length() > 0) uvp.normalize();
 		
 		Vector3d ulat = new Vector3d();
 		ulat.cross(c3,uvp);
-		ulat.normalize();
+		if(ulat.length() > 0) ulat.normalize();
 		
 		Vector3d omega_C = new Vector3d(fd*ct,thd,fd*st+gd);
 		Vector3d omega_N = new Vector3d(omega_C);

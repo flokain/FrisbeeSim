@@ -31,6 +31,9 @@ public class Frisbee extends UltimateEntity implements Steppable
 		flightModel = new FlightModel_HummelNew(physicalModelofDisc);
 	}
 	
+	public Frisbee() throws IOException {
+		this(new Double3D());
+	}
 	@Override
 	public AccelerationsContainer calcAccelerations(Ultimate ultimate)
 	{	
