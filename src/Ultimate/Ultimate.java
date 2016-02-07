@@ -19,7 +19,7 @@ public class Ultimate extends SimState{
 	double fieldWidth = 37.0; // size of an ultimate field in meters
 	double fieldLength = 100.0; 
 	double endzoneLength = 16.0;
-	double stepTime = 0.001; // simulated time that elapses between 2 steps (all forces are calculated in m/s^2)
+	double stepTime = 0.0001; // simulated time that elapses between 2 steps (all forces are calculated in m/s^2)
 	Bag positionsOffence;
 	Bag positionsDefence;
 	public Frisbee frisbee;
