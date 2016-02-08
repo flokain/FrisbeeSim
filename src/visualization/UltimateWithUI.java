@@ -61,12 +61,12 @@ public class UltimateWithUI extends GUIState
 		
 		con.setVisible(true);
 		
-	    // Buttons
-		JPanel pnlButton = new JPanel();
+//	    // Buttons
+		JPanel pnl = new JPanel();
 	    JButton button = new JButton("Fly!");
-	    
-	    pnlButton.add(button);
-	    
+//	    
+	    pnl.add(button);
+//	    
 	    button.addActionListener( new ActionListener() 
 	    {
 			@Override
@@ -81,8 +81,8 @@ public class UltimateWithUI extends GUIState
 				ultimate.frisbee.throwDisc(velocity, orientation, omega);
 			}
 		});
-	    
-	    con.getTabPane().addTab("Commands",pnlButton);
+//	    
+	    con.getTabPane().addTab("Commands",pnl);
 	}
 
 	public UltimateWithUI() throws IOException { super(new Ultimate(System.currentTimeMillis())); }

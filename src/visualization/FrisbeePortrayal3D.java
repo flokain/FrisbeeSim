@@ -28,8 +28,10 @@ import sim.portrayal.LocationWrapper;
 import sim.portrayal3d.SimplePortrayal3D;
 import sim.portrayal3d.simple.Arrow;
 import sim.portrayal3d.simple.BranchGroupPortrayal3D;
+import sim.portrayal3d.simple.PrimitivePortrayal3D;
 import sim.util.Double3D;
 import Ultimate.Frisbee;
+import Ultimate.UltimateEntity;
 
 import com.sun.j3d.loaders.IncorrectFormatException;
 import com.sun.j3d.loaders.ParsingErrorException;
@@ -38,34 +40,38 @@ import com.sun.j3d.loaders.objectfile.ObjectFile;
 import com.sun.j3d.utils.geometry.ColorCube;
 import com.sun.javafx.sg.prism.NGNode;
 
-public class FrisbeePortrayal3D extends SimplePortrayal3D
+public class FrisbeePortrayal3D extends PrimitivePortrayal3D
 {
-	BranchGroup bgTop;
+	TransformGroup tgTop;
 		TransformGroup tgFrisbee;
 			BranchGroup bgFrisbeeModel;
 		BranchGroup bgPhysics;
-			Arrow velocityArrow;
-			Arrow omegaArrow;
-			Arrow accelerationArrow;
-			Arrow alphaArrow;
+			BranchGroup bgArrows;
+				Arrow velocityArrow;
+				Arrow omegaArrow;
+				Arrow accelerationArrow;
+				Arrow alphaArrow;
 
 	/** Constructs a FrisbeePortrayal3D with a default (flat opaque white) appearance and a scale of 1.0. */
     public FrisbeePortrayal3D()
         {
-	    	super();
-    		bgTop = new BranchGroup();
+    		tgTop = new TransformGroup();
+    		tgTop.setCapability(TransformGroup.ALLOW_CHILDREN_EXTEND);
     			tgFrisbee = new TransformGroup();
     			tgFrisbee.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
     				bgFrisbeeModel = loadModel();
 				bgPhysics = new BranchGroup();
-				
-			bgTop.addChild(tgFrisbee);
+				bgPhysics.setCapability(BranchGroup.ALLOW_DETACH);
+				bgPhysics.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
+				bgPhysics.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
+					bgArrows = new BranchGroup();
+			
+			tgTop.addChild(tgFrisbee);
 				tgFrisbee.addChild(bgFrisbeeModel);
-			bgTop.addChild(bgPhysics);
-				bgPhysics.addChild(velocityArrow);
-				bgPhysics.addChild(omegaArrow);
-				bgPhysics.addChild(accelerationArrow);
-				bgPhysics.addChild(alphaArrow);
+			tgTop.addChild(bgPhysics);
+				bgPhysics.addChild(bgArrows);
+			
+			group = tgTop;	
         }
     
 	@Override
@@ -77,12 +83,9 @@ public class FrisbeePortrayal3D extends SimplePortrayal3D
 		{
 			prev = new TransformGroup();
 			prev.setCapability(Group.ALLOW_CHILDREN_READ);
-			prev.addChild(bgTop);
+			prev.addChild(tgTop);
 			//set facets of the disc pickable.
-			bgFrisbeeModel.setPickable(true);
-			//setPickable(frisbee, bgFrisbeeModel);
-			
-			
+			setPickable(frisbee, bgFrisbeeModel);
 		}
 		
 		Matrix3d rot1 = new Matrix3d();
@@ -97,10 +100,20 @@ public class FrisbeePortrayal3D extends SimplePortrayal3D
 		orientationAsMatrix.transpose();
 		
 		tgFrisbee.setTransform(new Transform3D(orientationAsMatrix, new Vector3d(),1));
-		velocityArrow = new Arrow( frisbee.getVelocity(), "Velocity", Color.YELLOW);
+		
+		bgArrows = new BranchGroup();
+		
+		velocityArrow = new Arrow (frisbee.getVelocity(),"Velocity",Color.YELLOW);
 		omegaArrow = new Arrow( frisbee.getOmega(), "Omega", Color.YELLOW);
 		accelerationArrow = new Arrow( frisbee.getAcceleration(), "Acceleration", Color.BLUE);
 		alphaArrow = new Arrow( frisbee.getAlpha(), "Alpha", Color.BLUE);
+		
+		bgArrows.addChild(velocityArrow);
+		bgArrows.addChild(omegaArrow);
+		bgArrows.addChild(accelerationArrow);
+		bgArrows.addChild(alphaArrow);
+		
+		bgPhysics.setChild(bgArrows,0);
 		return prev;
 	}
 	
@@ -143,17 +156,33 @@ public class FrisbeePortrayal3D extends SimplePortrayal3D
 	{
 		public Arrow(Double3D top, String label,final Color color)
 		{
-			super(0.3, new Double3D(), top, null, label, new Appearance()
+			super(0.05, new Double3D(0,0,0), top, null, label, new Appearance()
 			{
 				{
 					setColoringAttributes(new ColoringAttributes(new Color3f(color),ColoringAttributes.SHADE_GOURAUD));
 				}
-				{
-					
-				}
 			});
+				
 		}
 		
+		
+		public void setHeadRelative(Double3D pa) {
+			// TODO Auto-generated method stub
+			Vector3d p = new Vector3d(pa.x,pa.y,pa.z);
+			Matrix3d rotScale = new Matrix3d();
+			rotScale.setColumn(0, p);
+			Vector3d origin = new Vector3d();
+			
+			Transform3D oriTrans = new Transform3D();
+			this.getTransform(oriTrans);
+			oriTrans.get(origin);
+			
+			Transform3D trans = new Transform3D();
+			trans.setTranslation(origin);
+			trans.setRotationScale(rotScale);
+			super.setTransform(trans);
+		}
+			
 	}
 	public void setPickable(Object object,Node node)
 	{
@@ -170,6 +199,12 @@ public class FrisbeePortrayal3D extends SimplePortrayal3D
 			node.setUserData(wrapper);
 			setPickableFlags((Shape3D)node);
 		}
+	}
+
+	@Override
+	protected int numShapes() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }
 
