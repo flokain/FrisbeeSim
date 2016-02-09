@@ -2,8 +2,6 @@ package Ultimate;
 
 import java.io.IOException;
 
-import com.sun.prism.paint.Color;
-
 import disc.physics.aerodynamics.FlightModel_HummelNew;
 import disc.physics.aerodynamics.FlyingDisc;
 import disc.physics.aerodynamics.FlightModel_HummelNew.DeValueContainer;
@@ -13,8 +11,7 @@ import sim.util.Double3D;
 
 public class Frisbee extends UltimateEntity implements Steppable
 {
-
-	private static final long serialVersionUID = -277584315287176445L;
+	boolean arrowsFlag = true;
 	
 	private FlightModel_HummelNew flightModel;
 

@@ -10,6 +10,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import javax.media.j3d.Shape3D;
@@ -37,6 +38,7 @@ import sim.portrayal.continuous.ContinuousPortrayal2D;
 import sim.portrayal.simple.RectanglePortrayal2D;
 import sim.portrayal3d.continuous.ContinuousPortrayal3D;
 import sim.portrayal3d.grid.quad.TilePortrayal;
+import sim.portrayal3d.simple.BranchGroupPortrayal3D;
 import sim.portrayal3d.simple.CubePortrayal3D;
 import sim.portrayal3d.simple.Shape3DPortrayal3D;
 import sim.util.Double3D;
@@ -132,7 +134,7 @@ public class UltimateWithUI extends GUIState
 		
 		// Make the Display2D
 		double scale = 1;
-		display2D = new Display2D(100*scale,37*scale,this); 
+		display2D = new Display2D(100*scale,37*scale,this);
 		display2D.setScale(10);
 		display2DFrame = display2D.createFrame();
 		display2DFrame.setVisible(true);
@@ -140,7 +142,7 @@ public class UltimateWithUI extends GUIState
 		display2DFrame.setSize(1000,500);
 		
 		// specify the backdrop color  -- what gets painted behind the displays
-		display2D.setBackdrop(new Color(50,140,50));  // a dark green
+		display2D.setBackdrop(new Color(50,140,50)); // a dark green
 		// attach the portrayals
 		display2D.attach(entityPortrayal2D,"Players and disc");
 		
@@ -222,7 +224,15 @@ public class UltimateWithUI extends GUIState
 		entityPortrayal3D.setField(((Ultimate)state).ultimateField3D);
 		entityPortrayal3D.setPortrayalForClass(Frisbee.class, new FrisbeePortrayal3D());
 		//entityPortrayal3D.setPortrayalForClass(PlayerOffence.class, new UltimateEntityPortrayal3D());
-		entityPortrayal3D.setPortrayalForClass(PlayerOffence.class, new CubePortrayal3D(Color.blue));
+		try {
+			entityPortrayal3D.setPortrayalForClass(PlayerOffence.class, new BranchGroupPortrayal3D(BranchGroupPortrayal3D.getBranchGroupForFile("3dmodels\\ea.obj")));
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		entityPortrayal3D.setPortrayalForClass(PlayerDefence.class, new Shape3DPortrayal3D(new Shape3D(new sim.app.crowd3d.GullCG())));
        
 	}

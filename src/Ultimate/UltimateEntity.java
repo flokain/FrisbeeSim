@@ -15,6 +15,7 @@ public abstract class UltimateEntity implements Steppable, TabbableAndGroupable 
 
 	protected double mass; 
 	protected double radius; // all elements are considerd to be balls or tubes for visualization
+	protected boolean arrowsFlag; // turn arrows in the visualization on or off. TODO : not a good solution.outsource to the portayal?
 	
 	protected MutableDouble3D position;
 	protected MutableDouble3D orientation; 
@@ -280,5 +281,11 @@ public Double3D getAcceleration() {
 }
 public Double3D getAlpha() {
 	return new Double3D(alpha);
+}
+public void setArrowsVisible(boolean b){
+	arrowsFlag = b;
+}
+public boolean getArrowsVisible(){
+	return arrowsFlag;
 }
 }
