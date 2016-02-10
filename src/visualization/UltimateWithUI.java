@@ -60,7 +60,7 @@ public class UltimateWithUI extends GUIState
 	{
 		UltimateWithUI vid = new UltimateWithUI();
 		con = new Console(vid);
-		
+		//vid.scheduleRepeatingImmediatelyBefore(new sim.display.RateAdjuster(60.0));
 		con.setVisible(true);
 		
 //	    // Buttons
@@ -147,7 +147,13 @@ public class UltimateWithUI extends GUIState
 		display2D.attach(entityPortrayal2D,"Players and disc");
 		
 		// Make the Display3D
-		display3D = new Display3D(900,500,this);
+		display3D = new Display3D(900,500,this)
+		{
+			{
+				updateRule = Display2D.UPDATE_RULE_WALLCLOCK_TIME;
+				wallInterval = 40; // 40 ms = 25frames/s  20ms = 50 frames/s
+			}
+		};
 		display3D.setBackdrop((new ImageIcon("images/horizon.jpg")).getImage(), true);
 		
 		// add the portrayal3ds of players disc and the playingfield to the display

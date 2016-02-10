@@ -20,6 +20,7 @@ public class Ultimate extends SimState{
 	double fieldLength = 100.0; 
 	double endzoneLength = 16.0;
 	double stepTime = 0.0001; // simulated time that elapses between 2 steps (all forces are calculated in m/s^2)
+	
 	Bag positionsOffence;
 	Bag positionsDefence;
 	public Frisbee frisbee;
@@ -28,6 +29,7 @@ public class Ultimate extends SimState{
 	public Ultimate(long seed) throws IOException
 	{		
 		super(seed); 	
+		
 		positionsOffence = new Bag();
 		positionsDefence = new Bag();
 		try {
@@ -174,6 +176,10 @@ public class Ultimate extends SimState{
 
 	public MutableDouble3D getDiscAlpha() { return frisbee.alpha;}
 	public void setDiscAlpha(Double3D alpha) {frisbee.alpha.setTo(alpha);}	
+	
+	public double getStepTime() {
+		return stepTime;
+	}
 	
 	public static void main(String[] args)
 	{
