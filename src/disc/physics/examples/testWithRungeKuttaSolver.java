@@ -3,13 +3,13 @@ package disc.physics.examples;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import rungeKutta.EmbeddedRungeKutta;
-import rungeKutta.RungeKutta;
-import rungeKutta.Solver;
-
 import org.knowm.xchart.internal.chartpart.Chart;
 import org.knowm.xchart.QuickChart;
 import org.knowm.xchart.SwingWrapper;
+
+import rungeKutta.EmbeddedRungeKutta;
+import rungeKutta.RungeKutta;
+import rungeKutta.Solver;
 
 import differentialEquations.DifferentialEquation;
 import differentialEquations.InitialValueProblem;
@@ -46,7 +46,7 @@ public class testWithRungeKuttaSolver {
 		//instance DiscDeHummelOriginal
 		DifferentialEquation equationHummelOriginal = new DiscDeHummelOriginalWraper();
 		
-		//instance DiscDeHummelOriginal
+		//instance DiscDeHummelNew
 		DifferentialEquation equationHummelNew = new DiscDeHummelNewWraper(disc);
 		
 		//instance embeddedRungeKutta

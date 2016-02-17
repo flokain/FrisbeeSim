@@ -13,6 +13,7 @@ import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.Transform3D;
 import javax.swing.ImageIcon;
@@ -33,7 +34,9 @@ import sim.display.Display2D;
 import sim.display.GUIState;
 import sim.display3d.Display3D;
 import sim.engine.SimState;
+import sim.field.continuous.Continuous3D;
 import sim.portrayal.Inspector;
+import sim.portrayal.continuous.Continuous3DPortrayal2D;
 import sim.portrayal.continuous.ContinuousPortrayal2D;
 import sim.portrayal.simple.RectanglePortrayal2D;
 import sim.portrayal3d.continuous.ContinuousPortrayal3D;
@@ -41,6 +44,7 @@ import sim.portrayal3d.grid.quad.TilePortrayal;
 import sim.portrayal3d.simple.BranchGroupPortrayal3D;
 import sim.portrayal3d.simple.CubePortrayal3D;
 import sim.portrayal3d.simple.Shape3DPortrayal3D;
+import sim.util.Bag;
 import sim.util.Double3D;
 import sim.util.gui.SimpleColorMap;
 
@@ -49,7 +53,7 @@ public class UltimateWithUI extends GUIState
 	public Display2D display2D;
 	public JFrame display2DFrame;
 	static Console con;
-	ContinuousPortrayal2D entityPortrayal2D = new ContinuousPortrayal2D();
+	Continuous3DPortrayal2D entityPortrayal2D = new Continuous3DPortrayal2D();
 	
 	public Display3D display3D;
 	public JFrame display3DFrame;
@@ -79,6 +83,24 @@ public class UltimateWithUI extends GUIState
 				Double3D orientation = new Double3D(-7.11E-02, 2.11E-01, 5.03E+00);//rad
 				Double3D velocity = new Double3D(1.34E+01,  -4.11E-01, 1.12E-03);
 				Double3D omega = new Double3D(-1.49E+01, -1.48E+00, 5.43E+01);		
+				
+				ultimate.frisbee.throwDisc(velocity, orientation, omega);
+			}
+		});
+	    button = new JButton("Fly Ball_x!");
+//	    
+	    pnl.add(button);
+//	    
+	    button.addActionListener( new ActionListener() 
+	    {
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				Ultimate ultimate = (Ultimate)con.getSimulation().state;			
+				
+				Double3D orientation = new Double3D(0,0,0);//rad
+				Double3D velocity = new Double3D(10,0,10);
+				Double3D omega = new Double3D(0,0,0);		
 				
 				ultimate.frisbee.throwDisc(velocity, orientation, omega);
 			}
@@ -227,26 +249,46 @@ public class UltimateWithUI extends GUIState
 	}
 	public void setupFrisbeePortrayal3d()
 	{
-		entityPortrayal3D.setField(((Ultimate)state).ultimateField3D);
-		entityPortrayal3D.setPortrayalForClass(Frisbee.class, new FrisbeePortrayal3D());
-		//entityPortrayal3D.setPortrayalForClass(PlayerOffence.class, new UltimateEntityPortrayal3D());
-		try {
-			entityPortrayal3D.setPortrayalForClass(PlayerOffence.class, new BranchGroupPortrayal3D(BranchGroupPortrayal3D.getBranchGroupForFile("3dmodels\\ea.obj")));
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		Continuous3D field = ((Ultimate)state).ultimateField3D;
+		Bag objects = field.allObjects;
+		entityPortrayal3D.setField(field);
+		for (int i = 0; i < objects.size(); i++)
+		{
+			if(objects.objs[i] instanceof PlayerOffence)
+			{
+				entityPortrayal3D.setPortrayalForObject(objects.objs[i],  new UltimateEntityPortrayal3D(new BranchGroup() {{addChild(new Shape3D(new sim.app.crowd3d.GullCG()));}}));
+			}
+			else if(objects.objs[i] instanceof PlayerDefence)
+			{
+				entityPortrayal3D.setPortrayalForObject(objects.objs[i], new UltimateEntityPortrayal3D());
+			}			
+			else if(objects.objs[i] instanceof Frisbee)
+			{
+				entityPortrayal3D.setPortrayalForObject(objects.objs[i], new FrisbeePortrayal3D());
+			}
+			
+			
 		}
-		entityPortrayal3D.setPortrayalForClass(PlayerDefence.class, new Shape3DPortrayal3D(new Shape3D(new sim.app.crowd3d.GullCG())));
-       
+//		entityPortrayal3D.setField(field);
+//		entityPortrayal3D.setPortrayalForClass(Frisbee.class, new FrisbeePortrayal3D());
+//		entityPortrayal3D.setPortrayalForClass(PlayerOffence.class, new UltimateEntityPortrayal3D());
+//		try {
+//			entityPortrayal3D.setPortrayalForClass(PlayerOffence.class, new BranchGroupPortrayal3D(BranchGroupPortrayal3D.getBranchGroupForFile("3dmodels\\ea.obj")));
+//		} catch (IllegalArgumentException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		//entityPortrayal3D.setPortrayalForClass(PlayerDefence.class, new Shape3DPortrayal3D(new Shape3D(new sim.app.crowd3d.GullCG()),Color.red));
+		//entityPortrayal3D.setPortrayalForClass(PlayerOffence.class, new CubePortrayal3D(Color.blue));
 	}
 	@SuppressWarnings("serial")
 	public void setupFieldPortrayal2d()
 	{
 		// tell the portrayals what to portray and how to portray them 
-		entityPortrayal2D.setField(((Ultimate)state).ultimateField2D);
+		entityPortrayal2D.setField(((Ultimate)state).ultimateField3D);
 		entityPortrayal2D.setPortrayalForClass(FieldObject.class, new RectanglePortrayal2D(Color.white));
 		entityPortrayal2D.setPortrayalForClass(PlayerOffence.class, new UltimateEntityPortrayal2D(Color.blue,Color.green));
 		entityPortrayal2D.setPortrayalForClass(PlayerDefence.class, new UltimateEntityPortrayal2D(Color.red,Color.green));

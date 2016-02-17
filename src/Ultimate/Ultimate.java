@@ -8,13 +8,13 @@ import com.sun.accessibility.internal.resources.accessibility;
 import sim.engine.SimState;
 import sim.field.continuous.Continuous2D;
 import sim.field.continuous.Continuous3D;
+import sim.portrayal.continuous.Continuous3DPortrayal2D;
 import sim.util.Bag;
 import sim.util.Double2D;
 import sim.util.Double3D;
 import sim.util.MutableDouble3D;
 
 public class Ultimate extends SimState{
-	public Continuous2D ultimateField2D;
 	public Continuous3D ultimateField3D;
 	double fieldWidth = 37.0; // size of an ultimate field in meters
 	double fieldLength = 100.0; 
@@ -23,6 +23,8 @@ public class Ultimate extends SimState{
 	
 	Bag positionsOffence;
 	Bag positionsDefence;
+	ArrayList<PlayerOffence> offence;
+	ArrayList<PlayerDefence> defence;
 	public Frisbee frisbee;
 	public Double3D positionDisc;
 
@@ -33,22 +35,22 @@ public class Ultimate extends SimState{
 		positionsOffence = new Bag();
 		positionsDefence = new Bag();
 		try {
-			frisbee = new Frisbee();
+			//frisbee = new Frisbee();
+			frisbee = new Ball();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		for (int i = 0; i < 7; i++)
-			positionsOffence.add(new Double2D((endzoneLength+(fieldLength-endzoneLength)*(i)/7 ), fieldWidth/2));
+			positionsOffence.add(new Double3D((endzoneLength+(fieldLength-endzoneLength)*(i)/7 ), fieldWidth/2,0));
 		//		for (int i = 0; i < 7; i++)
 		//			positionsOffence.add(new Double2D(random.nextDouble()*fieldLength,random.nextDouble()*fieldWidth));
 		//
 		for (int i = 0; i < 7; i++)
-			positionsDefence.add(new Double2D((endzoneLength+(fieldLength-endzoneLength)*(i)/7 ), fieldWidth/2+2));
-		positionDisc = new Double3D( ((Double2D)positionsOffence.get(0)).x+1,((Double2D)positionsOffence.get(0)).y+1,1);
+			positionsDefence.add(new Double3D((endzoneLength+(fieldLength-endzoneLength)*(i)/7 ), fieldWidth/2+2,0));
+		positionDisc = new Double3D( ((Double3D)positionsOffence.get(0)).add(new Double3D(1,1,1)));
 		frisbee.position.setTo(positionDisc);
 		
 		//init field;
-		ultimateField2D = new Continuous2D(0.1, fieldLength,fieldWidth);
 		ultimateField3D = new Continuous3D(0.001, fieldLength, fieldWidth, 40);
 		ArrayList<FieldObject> lines = new ArrayList<FieldObject>(2);
 		lines.add(new FieldObject(endzoneLength,0,0,fieldWidth));
@@ -77,42 +79,43 @@ public class Ultimate extends SimState{
 	public void start()
 	{
 		super.start();
-		
+		positionsOffence = new Bag();
+		positionsDefence = new Bag();
 		for (int i = 0; i < 7; i++)
-			positionsOffence.add(new Double2D((endzoneLength+(fieldLength-endzoneLength)*(i)/7 ), fieldWidth/2));
+			positionsOffence.add(new Double3D((endzoneLength+(fieldLength-endzoneLength)*(i)/7 ), fieldWidth/2,0));
 		//		for (int i = 0; i < 7; i++)
 		//			positionsOffence.add(new Double2D(random.nextDouble()*fieldLength,random.nextDouble()*fieldWidth));
 		//
 		for (int i = 0; i < 7; i++)
-			positionsDefence.add(new Double2D((endzoneLength+(fieldLength-endzoneLength)*(i)/7 ), fieldWidth/2+2));
-		positionDisc = new Double3D( ((Double2D)positionsOffence.get(0)).x+1,((Double2D)positionsOffence.get(0)).y+1,1);
+			positionsDefence.add(new Double3D((endzoneLength+(fieldLength-endzoneLength)*(i)/7 ), fieldWidth/2+2,0));
+		positionDisc = new Double3D( ((Double3D)positionsOffence.get(0)).add(new Double3D(1,1,1)));
 		frisbee.position.setTo(positionDisc);
 		
 		//init field;
-		ultimateField2D = new Continuous2D(0.1, fieldLength,fieldWidth);
+		Continuous3DPortrayal2D ultimateField2D = new Continuous3DPortrayal2D(){{setField(ultimateField3D);}};
 		ultimateField3D = new Continuous3D(0.001, fieldLength, fieldWidth, 40);
 		ArrayList<FieldObject> lines = new ArrayList<FieldObject>(2);
 		lines.add(new FieldObject(endzoneLength,0,0,fieldWidth));
 		lines.add(new FieldObject(fieldLength - endzoneLength,0,0,fieldWidth));
 		
-		for ( int i = 0; i <lines.size();i++)
-		{
-			ultimateField2D.setObjectLocation(lines.get(i), lines.get(i).posi);
-		}
+//		for ( int i = 0; i <lines.size();i++)
+//		{
+//			ultimateField2D.setObjectLocation(lines.get(i), lines.get(i).posi);
+//		}
 			//init players
-			ArrayList<PlayerOffence> offence = new ArrayList<PlayerOffence>(7);
-			ArrayList<PlayerDefence> defence = new ArrayList<PlayerDefence>(7);
+			offence = new ArrayList<PlayerOffence>(7);
+			defence = new ArrayList<PlayerDefence>(7);
 
 			for ( int i = 0; i <positionsOffence.size(); i++)
 			{
-				offence.add(new PlayerOffence((Double2D) positionsOffence.get(i)));
-				ultimateField2D.setObjectLocation(offence.get(i),(Double2D)positionsOffence.get(i));
+				offence.add(new PlayerOffence((Double3D)positionsOffence.get(i)));
+				ultimateField3D.setObjectLocation(offence.get(i),(Double3D)positionsOffence.get(i));
 				schedule.scheduleRepeating(offence.get(i));
 			}
 			for ( int i = 0; i <positionsDefence.size(); i++)
 			{
-				defence.add(new PlayerDefence((Double2D) positionsDefence.get(i)));
-				ultimateField2D.setObjectLocation(defence.get(i),(Double2D)positionsDefence.get(i));
+				defence.add(new PlayerDefence((Double3D) positionsDefence.get(i)));
+				ultimateField3D.setObjectLocation(defence.get(i),(Double3D)positionsDefence.get(i));
 				schedule.scheduleRepeating(defence.get(i));
 			}
 			//init Frisbee
@@ -134,7 +137,7 @@ public class Ultimate extends SimState{
 
 //			frisbee.position.setTo(position);
 			//frisbee.throwDisc(velocity, orientation, omega);
-			ultimateField2D.setObjectLocation(frisbee, new Double2D(frisbee.position.x,frisbee.position.y));
+			ultimateField3D.setObjectLocation(frisbee, frisbee.getPosition());
 	}
 	private class UltimateField extends Continuous3D
 	{

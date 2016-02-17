@@ -1,13 +1,10 @@
 package Ultimate;
 
-import java.awt.Color;
-import java.lang.annotation.Inherited;
+import javax.vecmath.Matrix3d;
 
-import javafx.geometry.Orientation;
 import sim.engine.SimState;
 import sim.engine.Steppable;
 import sim.portrayal.inspector.TabbableAndGroupable;
-import sim.util.Double2D;
 import sim.util.Double3D;
 import sim.util.MutableDouble3D;
 
@@ -15,7 +12,7 @@ public abstract class UltimateEntity implements Steppable, TabbableAndGroupable 
 
 	protected double mass; 
 	protected double radius; // all elements are considerd to be balls or tubes for visualization
-	protected boolean arrowsFlag; // turn arrows in the visualization on or off. TODO : not a good solution.outsource to the portayal?
+	protected boolean arrowsFlag = true; // turn arrows in the visualization on or off. TODO : not a good solution.outsource to the portayal?
 	
 	protected MutableDouble3D position;
 	protected MutableDouble3D orientation; 
@@ -40,32 +37,22 @@ public abstract class UltimateEntity implements Steppable, TabbableAndGroupable 
 	{
 		this(posi, new Double3D(0,0,0), velocity, new Double3D(0,0,0), mass, radius);
 	}
-	public UltimateEntity( Double2D posi, Double2D velocity, double mass, double radius)
+	public UltimateEntity( Double3D posi, Double3D orientation, Double3D velocity, double mass, double radius)
 	{
-		this(posi,new Double2D(0,0), velocity, mass, radius);
+		this( posi, orientation,velocity, new Double3D(0,0,0), mass, radius);
 	}
-	public UltimateEntity( Double2D posi, Double2D orientation, Double2D velocity, double mass, double radius)
+	public UltimateEntity( Double3D posi, double mass, double radius){
+		this(  posi,new Double3D(),new Double3D(), mass, radius);	
+	}
+	public UltimateEntity( Double3D posi, double radius)
 	{
-		this( new Double3D(posi.x,posi.y,0), new Double3D(orientation.x,orientation.y,0), new Double3D(velocity.x,velocity.y,0), new Double3D(0,0,0), mass, radius);
+		this( posi,new Double3D(),new Double3D(),1.0, radius);
 	}
-	public UltimateEntity( Double2D posi, double mass, double radius){
-		this(  posi,new Double2D(0,0),new Double2D(0,0), mass, radius);	
-	}
-	public UltimateEntity( Double2D posi, double radius)
-	{
-		this( posi,new Double2D(0,0),new Double2D(0,0),1.0, radius);
-	}
-	public UltimateEntity( Double2D posi) 				
+	public UltimateEntity( Double3D posi) 				
 	{ 
 		this(posi, 1.0); 
-		}
-
-	
-	// override these functions!
-	
-	public UltimateEntity(Double3D position) {
-		// TODO Auto-generated constructor stub
 	}
+
 	public AccelerationsContainer calcAccelerations(Ultimate ultimate) // calculation of acceleration
 	{
 		return null; 
@@ -87,7 +74,7 @@ public abstract class UltimateEntity implements Steppable, TabbableAndGroupable 
 		orientation.addIn(new Double3D(omega).multiply(h));
 		omega.addIn(new Double3D(container.alpha).multiply(h));
 		
-		ultimate.ultimateField2D.setObjectLocation(this,new Double2D(position.x, position.y)); 				//set the location in 2d portrayal
+		//ultimate.ultimateField2D.setObjectLocation(this,new Double2D(position.x, position.y)); 				//set the location in 2d portrayal
 		ultimate.ultimateField3D.setObjectLocation(this,new Double3D(position.x,position.y,position.z)); 	//set the location in 3d portrayal
 	}
 	
@@ -106,11 +93,13 @@ public abstract class UltimateEntity implements Steppable, TabbableAndGroupable 
 	@Override
 	public String[] provideTabNames() 
 	{
-		return new String[]{"Translation", "Rotation"};
+		return new String[]{"Translation", "Rotation","Visualization"};
 	}
     public String[][] provideTabGroups()
     { return new String[][] {{"Position","Velocity","Acceleration"},
-                             {"Orientation","Omega","Alpha"}};
+                             {"Orientation","Omega","Alpha"},
+                             {}
+                            };
     }
 	@Override
 	public String[][][] provideTabGroupProperties() {
@@ -122,8 +111,27 @@ public abstract class UltimateEntity implements Steppable, TabbableAndGroupable 
 		 {{"OrientationX","OrientationY","OrientationZ"},
 		  {"OmegaX","OmegaY","OmegaZ"},
 		  {"AlphaX","AlphaY","AlphaZ"}
+		 },
+		 {
+			 {"ArrowsVisible"}
 		 }
 		};
+	}
+	public Matrix3d getOrientationAsMatrix()
+	{
+		Matrix3d rot1 = new Matrix3d();
+		rot1.rotX(-getOrientation().x);
+		Matrix3d rot2 = new Matrix3d();
+		rot2.rotY(-getOrientation().y);
+		Matrix3d rot3 = new Matrix3d();
+		rot3.rotZ(-getOrientation().z);
+		Matrix3d orientationAsMatrix = new Matrix3d();
+		orientationAsMatrix.setIdentity();
+		orientationAsMatrix.mul(rot3);
+		orientationAsMatrix.mul(rot2);
+		orientationAsMatrix.mul(rot1);
+		orientationAsMatrix.transpose();
+		return orientationAsMatrix;
 	}
 
                     
@@ -191,23 +199,23 @@ public double getAlphaY() {
 public double getAlphaZ() {
 	return alpha.z;
 }
-public Double3D setPosition() {
-	return new Double3D(position);
+public void setPosition(Double3D position) {
+	this.position.setTo(position);
 }
-public Double3D setOrientation() {
-	return new Double3D(orientation);
+public void setOrientation(Double3D orientation) {
+	this.orientation.setTo(orientation);
 }
-public Double3D setVelocity() {
-	return new Double3D(velocity);
+public void setVelocity(Double3D velocity) {
+	this.velocity.setTo(velocity);
 }
-public Double3D setOmega() {
-	return new Double3D(omega);
+public void setOmega(Double3D omega) {
+	this.omega.setTo(omega);
 }
-public Double3D setAcceleration() {
-	return new Double3D(acceleration);
+public void setAcceleration(Double3D acceleration) {
+	this.acceleration.setTo(acceleration);
 }
-public Double3D setAlpha() {
-	return new Double3D(alpha);
+public void setAlpha(Double3D alpha) {
+	this.alpha.setTo(alpha);
 }
 
 public double setPositionX(double x) {
