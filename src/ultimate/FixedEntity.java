@@ -1,4 +1,4 @@
-package Ultimate;
+package ultimate;
 
 import sim.util.Double3D;
 

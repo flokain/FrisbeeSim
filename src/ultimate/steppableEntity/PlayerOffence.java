@@ -1,4 +1,4 @@
-package Ultimate;
+package ultimate.steppableEntity;
 
 import java.awt.Color;
 

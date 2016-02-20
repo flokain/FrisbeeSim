@@ -7,13 +7,19 @@ import java.util.Enumeration;
 
 import javax.media.j3d.Appearance;
 import javax.media.j3d.BranchGroup;
+import javax.media.j3d.ColoringAttributes;
 import javax.media.j3d.Group;
 import javax.media.j3d.Node;
+import javax.media.j3d.QuadArray;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
+import javax.media.j3d.TransparencyAttributes;
+import javax.media.j3d.TriangleStripArray;
+import javax.vecmath.Color3f;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
+import javax.vecmath.Vector3f;
 
 import sim.portrayal.LocationWrapper;
 import sim.portrayal3d.SimplePortrayal3D;
@@ -21,8 +27,8 @@ import sim.portrayal3d.simple.BranchGroupPortrayal3D;
 import sim.portrayal3d.simple.CubePortrayal3D;
 import sim.portrayal3d.simple.PrimitivePortrayal3D;
 import sim.util.Double3D;
-import Ultimate.Frisbee;
-import Ultimate.UltimateEntity;
+import ultimate.UltimateEntity;
+import ultimate.steppableEntity.Frisbee;
 
 import com.sun.j3d.loaders.IncorrectFormatException;
 import com.sun.j3d.loaders.ParsingErrorException;
@@ -32,10 +38,11 @@ import com.sun.j3d.utils.geometry.ColorCube;
 
 public class UltimateEntityPortrayal3D extends PrimitivePortrayal3D 
 {
-	TransformGroup tgTop;
+	BranchGroup bgTop;
 		TransformGroup tgEntity;
 			TransformGroup tgInitialTransform;
 				BranchGroup bgEntityModel;
+				
 		BranchGroup bgPhysics;
 			BranchGroup bgArrows;
 				Arrow velocityArrow;
@@ -44,14 +51,18 @@ public class UltimateEntityPortrayal3D extends PrimitivePortrayal3D
 				Arrow alphaArrow;
 				Arrow orientationXArrow;
 				Arrow orientationZArrow;
+		BranchGroup bgTrail;
+		    TransformGroup tgTrail;
+				Shape3D shapeTrail;
 	
 
 	/** Constructs a UltimateEntityPortrayal3D with a default (flat opaque white) appearance and a scale of 1.0. */
 	
     public UltimateEntityPortrayal3D(BranchGroup entityModel,Transform3D transform)
     {
-    		tgTop = new TransformGroup();
-    		tgTop.setCapability(TransformGroup.ALLOW_CHILDREN_EXTEND);
+    		bgTop = new BranchGroup();
+    		bgTop.setCapability(BranchGroup.ALLOW_DETACH);
+    		bgTop.setCapability(TransformGroup.ALLOW_CHILDREN_EXTEND);
     			tgEntity = new TransformGroup();
     			tgEntity.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
     				tgInitialTransform = new TransformGroup(transform);
@@ -76,12 +87,17 @@ public class UltimateEntityPortrayal3D extends PrimitivePortrayal3D
 						orientationXArrow.setCapability(BranchGroup.ALLOW_DETACH);
 						orientationZArrow = new Arrow("localZ", Color.RED);
 						orientationZArrow.setCapability(BranchGroup.ALLOW_DETACH);
-					
+				bgTrail = new BranchGroup();
+				 	tgTrail = new TransformGroup();
+				 	tgTrail.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+						shapeTrail = new Shape3D();
+						shapeTrail.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
+						shapeTrail.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 			
-			tgTop.addChild(tgEntity);
+			bgTop.addChild(tgEntity);
 				tgEntity.addChild(tgInitialTransform);
 				tgInitialTransform.addChild(bgEntityModel);
-			tgTop.addChild(bgPhysics);
+			bgTop.addChild(bgPhysics);
 				bgPhysics.addChild(bgArrows);
 					bgArrows.addChild(velocityArrow);
 					bgArrows.addChild(omegaArrow);
@@ -89,8 +105,11 @@ public class UltimateEntityPortrayal3D extends PrimitivePortrayal3D
 					bgArrows.addChild(alphaArrow);
 					bgArrows.addChild(orientationXArrow);
 					bgArrows.addChild(orientationZArrow);
+			bgTop.addChild(bgTrail);		
+				bgTrail.addChild(tgTrail);
+					tgTrail.addChild(shapeTrail);
 			
-			group = tgTop;	
+			group = bgTop;	
     }
     public UltimateEntityPortrayal3D(BranchGroup entityModel)
     {
@@ -114,7 +133,22 @@ public class UltimateEntityPortrayal3D extends PrimitivePortrayal3D
 		{
 			prev = new TransformGroup();
 			prev.setCapability(Group.ALLOW_CHILDREN_READ);
-			prev.addChild(tgTop);
+			prev.addChild(bgTop);
+			
+			QuadArray q= new QuadArray(4, QuadArray.COORDINATES);
+			Double3D p  = entity.getPosition();
+			q.setCoordinate(0,new double[]{p.x,p.y,0});
+			q.setCoordinate(1,new double[]{p.x,p.y,p.z});
+			q.setCoordinate(2,new double[]{p.x,p.y,p.z});
+			q.setCoordinate(3,new double[]{p.x,p.y,0});
+			shapeTrail.addGeometry(q);
+			shapeTrail.setAppearance( new Appearance()
+			{	
+				{
+					setColoringAttributes(new ColoringAttributes(new Color3f(Color.WHITE) ,ColoringAttributes.NICEST));
+					setTransparencyAttributes(new TransparencyAttributes(TransparencyAttributes.NICEST, 0.4f));
+				}
+			});
 			//set facets of the disc pickable.
 			setPickable(entity, bgEntityModel);
 		}
@@ -169,7 +203,37 @@ public class UltimateEntityPortrayal3D extends PrimitivePortrayal3D
 				
 			}
 		}
+		// if ( entity.getTrailVisible)
+
+		Transform3D t1 = new Transform3D();
+		prev.getTransform(t1);
+		t1.invert();
+		tgTrail.setTransform(t1);
+		QuadArray lastTrail =  (QuadArray)shapeTrail.getGeometry(shapeTrail.numGeometries()-1);
 		
+		double[] coordinate0 = new double[]{0,0,0};
+		double[] coordinate1 = new double[]{0,0,0};
+		lastTrail.getCoordinate(3, coordinate0);
+		lastTrail.getCoordinate(2, coordinate1);
+		
+		Double3D tmp = new Double3D(coordinate1[0],coordinate1[1],coordinate1[2]);
+		Double3D pos = entity.getPosition();
+		Double3D dir = tmp.subtract(pos);
+		if (dir.length() > 0.1)
+		{
+			QuadArray trail = new QuadArray(8, QuadArray.COORDINATES | QuadArray.NORMALS);
+			trail.setCapability(QuadArray.ALLOW_NORMAL_WRITE);
+			trail.setCoordinate(0, coordinate0);
+			trail.setCoordinate(1,coordinate1);
+			trail.setCoordinate(2,new double[]{pos.x,pos.y,pos.z});
+			trail.setCoordinate(3,new double[]{pos.x,pos.y,0});
+			trail.setCoordinate(7, coordinate0);
+			trail.setCoordinate(6,coordinate1);
+			trail.setCoordinate(5,new double[]{pos.x,pos.y,pos.z});
+			trail.setCoordinate(4,new double[]{pos.x,pos.y,0});
+			
+			shapeTrail.addGeometry(trail);
+		}
 			
 		return prev;
 	}

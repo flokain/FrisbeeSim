@@ -18,6 +18,7 @@ import javax.media.j3d.Appearance;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.ColoringAttributes;
 import javax.media.j3d.Material;
+import javax.media.j3d.Node;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
@@ -35,11 +36,6 @@ import com.sun.j3d.utils.geometry.Box;
 import com.sun.j3d.utils.geometry.Cone;
 import com.sun.j3d.utils.geometry.Cylinder;
 
-import Ultimate.FixedEntity;
-import Ultimate.Frisbee;
-import Ultimate.PlayerDefence;
-import Ultimate.PlayerOffence;
-import Ultimate.Ultimate;
 import sim.display.Console;
 import sim.display.Controller;
 import sim.display.Display2D;
@@ -61,6 +57,13 @@ import sim.portrayal3d.simple.Shape3DPortrayal3D;
 import sim.util.Bag;
 import sim.util.Double3D;
 import sim.util.gui.SimpleColorMap;
+import ultimate.FixedEntity;
+import ultimate.Ultimate;
+import ultimate.Ultimate.ExpermintSetup;
+import ultimate.fixedEntity.Line;
+import ultimate.steppableEntity.Frisbee;
+import ultimate.steppableEntity.PlayerDefence;
+import ultimate.steppableEntity.PlayerOffence;
 
 public class UltimateWithUI extends GUIState
 {
@@ -119,6 +122,19 @@ public class UltimateWithUI extends GUIState
 				ultimate.frisbee.throwDisc(velocity, orientation, omega);
 			}
 		});
+	    button = new JButton("Setup Hummel!");
+//	    
+	    pnl.add(button);
+//	    
+	    button.addActionListener( new ActionListener() 
+	    {
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				UltimateWithUI ultimate = (UltimateWithUI)con.getSimulation();
+				ultimate.initialize(ExpermintSetup.Hummel);
+			}
+		});
 //	    
 	    con.getTabPane().addTab("Commands",pnl);
 	}
@@ -142,6 +158,11 @@ public class UltimateWithUI extends GUIState
 	public void start()
 	{
 		super.start();
+		initialize(ExpermintSetup.VerticalStack);
+	}
+	public void initialize(ExpermintSetup setup)
+	{
+		((Ultimate)state).initialize(setup);
 		// set up our portrayals
 		setupPortrayals();
 		
@@ -259,7 +280,7 @@ public class UltimateWithUI extends GUIState
 	public void setupPortrayals()
 	{
 		setupFieldPortrayal2d();
-		setupFrisbeePortrayal3d();	
+		setupFrisbeePortrayal3d();
 	}
 	public void setupFrisbeePortrayal3d()
 	{
@@ -311,15 +332,30 @@ public class UltimateWithUI extends GUIState
 					axis.normalize();
 					trans.set(new AxisAngle4d(axis, ang));
 				}
+
 				final TransformGroup t = new TransformGroup(trans);
+				final Node c;
 				Appearance app = new Appearance();
-				app.setColoringAttributes(new ColoringAttributes(new Color3f(Color.WHITE) ,ColoringAttributes.NICEST));
-				final Cylinder c= new Cylinder(0.05f, (float) dir.length(),app);
-				t.addChild(c);
 				
+				if(objects.objs[i] instanceof ultimate.fixedEntity.Cone)
+				{
+					app.setColoringAttributes(new ColoringAttributes(new Color3f(Color.ORANGE) ,ColoringAttributes.NICEST));
+					c= new Cone(0.1f, (float) dir.length(),app);
+				}
+				else if(objects.objs[i] instanceof ultimate.fixedEntity.Wall)
+				{
+					ultimate.fixedEntity.Wall wall = (ultimate.fixedEntity.Wall) objects.objs[i];
+					app.setColoringAttributes(new ColoringAttributes(new Color3f(Color.YELLOW) ,ColoringAttributes.NICEST));
+					c= new Box((float) wall.depth,(float) wall.width, (float) dir.length(),app);
+				}
+				else
+				{
+					c= new Cylinder(0.05f, (float) dir.length(),app);
+				}
+				
+				t.addChild(c);
 				entityPortrayal3D.setPortrayalForObject(objects.objs[i], new BranchGroupPortrayal3D(new BranchGroup() 
 				{{			
-					
 					addChild(t);
 				}}
 				));

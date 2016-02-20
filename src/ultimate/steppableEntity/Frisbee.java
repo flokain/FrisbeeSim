@@ -1,4 +1,4 @@
-package Ultimate;
+package ultimate.steppableEntity;
 
 import java.io.IOException;
 
@@ -8,6 +8,9 @@ import disc.physics.aerodynamics.FlightModel_HummelNew.DeValueContainer;
 import disc.physics.aerodynamics.FlyingDisc.flightCoefficientsType;
 import sim.engine.Steppable;
 import sim.util.Double3D;
+import ultimate.Ultimate;
+import ultimate.UltimateEntity;
+import ultimate.UltimateEntity.AccelerationsContainer;
 
 public class Frisbee extends UltimateEntity implements Steppable
 {
@@ -23,7 +26,7 @@ public class Frisbee extends UltimateEntity implements Steppable
 		flightModel = new FlightModel_HummelNew(physicalModelofDisc);
 		arrowsFlag = true;
 	}
-	Frisbee(Double3D position) throws IOException
+	public Frisbee(Double3D position) throws IOException
 	{
 		super(position, new Double3D(0,0,0),new Double3D(0,0,0),new Double3D(0,0,0),0.175,0.135);
 		FlyingDisc physicalModelofDisc = new FlyingDisc(flightCoefficientsType.HUMMEL_SHORT);

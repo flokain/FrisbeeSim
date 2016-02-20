@@ -1,4 +1,4 @@
-package Ultimate;
+package ultimate.steppableEntity;
 
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
@@ -6,6 +6,9 @@ import javax.vecmath.Vector3d;
 import sim.engine.Steppable;
 import sim.util.Double3D;
 import sim.util.MutableDouble2D;
+import ultimate.Ultimate;
+import ultimate.UltimateEntity;
+import ultimate.UltimateEntity.AccelerationsContainer;
 
 public abstract class Player extends UltimateEntity implements Steppable {
 

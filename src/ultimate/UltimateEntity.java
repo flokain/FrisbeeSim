@@ -1,4 +1,4 @@
-package Ultimate;
+package ultimate;
 
 import javax.vecmath.Matrix3d;
 
@@ -78,7 +78,7 @@ public abstract class UltimateEntity implements Steppable, TabbableAndGroupable 
 		ultimate.ultimateField3D.setObjectLocation(this,new Double3D(position.x,position.y,position.z)); 	//set the location in 3d portrayal
 	}
 	
-	protected class AccelerationsContainer
+	public class AccelerationsContainer
 	{
 		Double3D acceleration;
 		Double3D alpha;

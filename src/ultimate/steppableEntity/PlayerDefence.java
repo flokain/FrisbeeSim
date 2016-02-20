@@ -1,7 +1,8 @@
-package Ultimate;
+package ultimate.steppableEntity;
 
 import sim.util.Double2D;
 import sim.util.Double3D;
+import ultimate.UltimateEntity;
 
 public class PlayerDefence extends Player
 {

@@ -8,8 +8,6 @@ import javax.swing.JPanel;
 
 import com.lowagie.text.pdf.hyphenation.TernaryTree.Iterator;
 
-import Ultimate.Frisbee;
-import Ultimate.Ultimate;
 import sim.portrayal.Inspector;
 import sim.portrayal.SimpleInspector;
 import sim.portrayal.inspector.GroupedInspector;
@@ -19,6 +17,8 @@ import sim.util.Interval;
 import sim.util.Properties;
 import sim.util.gui.DisclosurePanel;
 import sim.util.gui.LabelledList;
+import ultimate.Ultimate;
+import ultimate.steppableEntity.Frisbee;
 
 public class FrisbeeControlPanel extends JPanel {
 	
