@@ -50,7 +50,14 @@ public class Ultimate extends SimState{
 			//frisbee = new Ball();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}		
+		}
+		
+		playerOffence = new Bag();
+		playerDefence = new Bag();
+		cones = new Bag();
+		obstacles = new Bag();
+		Frisbees = new Bag();
+		ultimateField3D = new Continuous3D(0.001, fieldLength, fieldWidth, 40);
 	}
 	public void stop()
 	{
@@ -60,12 +67,12 @@ public class Ultimate extends SimState{
 
 	public void initialize(ExpermintSetup setup){
 			
-		playerOffence = new Bag();
-		playerDefence = new Bag();
-		cones = new Bag();
-		obstacles = new Bag();
-		Frisbees = new Bag();
-		ultimateField3D = new Continuous3D(0.001, fieldLength, fieldWidth, 40);
+		playerOffence.clear();
+		playerDefence.clear();
+		cones.clear();
+		obstacles.clear();
+		Frisbees.clear();
+		ultimateField3D.clear();
 		switch (setup)
 		{
 		case VerticalStack:
@@ -120,7 +127,6 @@ public class Ultimate extends SimState{
 		}
 		case Hummel:
 		{
-			ultimateField3D = new Continuous3D(0.001, fieldLength, fieldWidth, 40);
 			try {
 				frisbee = new Frisbee(new Double3D(endzoneLength+1,fieldWidth/2+1,1));
 			} catch (IOException e) {
@@ -138,7 +144,7 @@ public class Ultimate extends SimState{
 	public void start()
 	{
 		super.start();
-		initialize(ExpermintSetup.Default);
+		//initialize(ExpermintSetup.Default);
 	}
 	private class UltimateField extends Continuous3D
 	{

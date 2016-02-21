@@ -5,9 +5,15 @@
  */
 
 package visualization;
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,6 +29,9 @@ import javax.media.j3d.Shape3D;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.media.j3d.TransparencyAttributes;
+import javax.swing.BoxLayout;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -32,10 +41,13 @@ import javax.vecmath.Color3f;
 import javax.vecmath.Matrix3d;
 import javax.vecmath.Vector3d;
 
+import com.lowagie.text.Jpeg;
 import com.sun.j3d.utils.geometry.Box;
 import com.sun.j3d.utils.geometry.Cone;
 import com.sun.j3d.utils.geometry.Cylinder;
 
+import disc.physics.aerodynamics.FlightModel;
+import disc.physics.aerodynamics.FlightModel_Kain;
 import sim.display.Console;
 import sim.display.Controller;
 import sim.display.Display2D;
@@ -83,60 +95,7 @@ public class UltimateWithUI extends GUIState
 		con = new Console(vid);
 		//vid.scheduleRepeatingImmediatelyBefore(new sim.display.RateAdjuster(60.0));
 		con.setVisible(true);
-		
-//	    // Buttons
-		JPanel pnl = new JPanel();
-	    JButton button = new JButton("Fly!");
-//	    
-	    pnl.add(button);
-//	    
-	    button.addActionListener( new ActionListener() 
-	    {
-			@Override
-			public void actionPerformed(ActionEvent e) 
-			{
-				Ultimate ultimate = (Ultimate)con.getSimulation().state;			
-				
-				Double3D orientation = new Double3D(-7.11E-02, 2.11E-01, 5.03E+00);//rad
-				Double3D velocity = new Double3D(1.34E+01,  -4.11E-01, 1.12E-03);
-				Double3D omega = new Double3D(-1.49E+01, -1.48E+00, 5.43E+01);		
-				
-				ultimate.frisbee.throwDisc(velocity, orientation, omega);
-			}
-		});
-	    button = new JButton("Fly Ball_x!");
-//	    
-	    pnl.add(button);
-//	    
-	    button.addActionListener( new ActionListener() 
-	    {
-			@Override
-			public void actionPerformed(ActionEvent e) 
-			{
-				Ultimate ultimate = (Ultimate)con.getSimulation().state;			
-				
-				Double3D orientation = new Double3D(0,0,0);//rad
-				Double3D velocity = new Double3D(10,0,10);
-				Double3D omega = new Double3D(0,0,0);		
-				
-				ultimate.frisbee.throwDisc(velocity, orientation, omega);
-			}
-		});
-	    button = new JButton("Setup Hummel!");
-//	    
-	    pnl.add(button);
-//	    
-	    button.addActionListener( new ActionListener() 
-	    {
-			@Override
-			public void actionPerformed(ActionEvent e) 
-			{
-				UltimateWithUI ultimate = (UltimateWithUI)con.getSimulation();
-				ultimate.initialize(ExpermintSetup.Hummel);
-			}
-		});
-//	    
-	    con.getTabPane().addTab("Commands",pnl);
+		setupCommandPanel();
 	}
 
 	public UltimateWithUI() throws IOException { super(new Ultimate(System.currentTimeMillis())); }
@@ -159,6 +118,11 @@ public class UltimateWithUI extends GUIState
 	{
 		super.start();
 		initialize(ExpermintSetup.VerticalStack);
+	}
+	public void start(ExpermintSetup setup)
+	{
+		super.start();
+		initialize(setup);
 	}
 	public void initialize(ExpermintSetup setup)
 	{
@@ -382,15 +346,124 @@ public class UltimateWithUI extends GUIState
 			    Double3D  t = ((FixedEntity)object).getTop();
 			    g.setColor(Color.white);
 			    g.drawLine( (int)(p.x* info.draw.height),(int)(p.y*info.draw.width),(int) (t.x*info.draw.height),(int) (t.y*info.draw.width));
-//			    g.drawLine((int)info.draw.x,
-//			        (int)info.draw.y,
-//			        (int)(info.draw.x) + (int)(width),
-//			        (int)(info.draw.y) + (int)(height));
+			    g.drawLine((int)info.draw.x,
+			        (int)info.draw.y,
+			        (int)(info.draw.x) + (int)(width),
+			        (int)(info.draw.y) + (int)(height));
 			}
 		});
 		entityPortrayal2D.setPortrayalForClass(PlayerOffence.class, new UltimateEntityPortrayal2D(Color.blue,Color.green));
 		entityPortrayal2D.setPortrayalForClass(PlayerDefence.class, new UltimateEntityPortrayal2D(Color.red,Color.green));
 		entityPortrayal2D.setPortrayalForClass(Frisbee.class, new UltimateEntityPortrayal2D(Color.white,Color.green));
+	}
+	
+	public static void setupCommandPanel()
+	{
+		
+		// add new pnl as tab to console
+		JPanel commandPnl = new JPanel();
+		commandPnl.setLayout(new GridBagLayout());
+		con.getTabPane().addTab("Commands",commandPnl);
+	    GridBagConstraints c = new GridBagConstraints();		
+	    c.weightx = 0.5;
+	    c.weighty = 0.5;
+	    c.anchor = GridBagConstraints.NORTH;
+	    c.fill = GridBagConstraints.HORIZONTAL;
+
+	    //setup a Pnl for interaction.
+	    JPanel pnl = new JPanel();
+	    pnl.setLayout(new GridBagLayout());
+	    pnl.setBorder(BorderFactory.createTitledBorder("Interaction"));
+
+	    c.gridx = 0;
+	    c.gridy = 0;
+	    commandPnl.add(pnl,c);	    
+	    
+		JButton button = new JButton("Hummel-flight f2302");
+	    c.gridx = 0;
+	    c.gridy = 0;
+	    c.insets = new Insets(1,2,1,2);
+	    pnl.add(button, c);
+	    button.addActionListener( new ActionListener() 
+	    {
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				Ultimate ultimate = (Ultimate)con.getSimulation().state;			
+				
+				Double3D orientation = new Double3D(-7.11E-02, 2.11E-01, 5.03E+00);//rad
+				Double3D velocity = new Double3D(1.34E+01,  -4.11E-01, 1.12E-03);
+				Double3D omega = new Double3D(-1.49E+01, -1.48E+00, 5.43E+01);		
+				
+				ultimate.frisbee.throwDisc(velocity, orientation, omega);
+			}
+		});
+	    
+	    button = new JButton("Kain-flight f2302");	
+	    c.gridx = 0;
+	    c.gridy = 1;
+		pnl.add(button,c);
+	    button.addActionListener( new ActionListener() 
+	    {
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				Ultimate ultimate = (Ultimate)con.getSimulation().state;
+				try {
+					ultimate.frisbee.setFlightModel(new FlightModel_Kain());
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+				Double3D orientation = new Double3D(0,0,0);//rad
+				Double3D velocity = new Double3D(10,0,10);
+				Double3D omega = new Double3D(0,0,0);		
+				
+				ultimate.frisbee.throwDisc(velocity, orientation, omega);
+			}
+		});
+
+
+	    //setup pnl for simulation Setups.
+	    pnl = new JPanel();
+	    pnl.setLayout(new GridBagLayout());
+	    c.gridx = 1;
+	    c.gridy = 0;
+	    commandPnl.add(pnl,c);
+	    pnl.setBorder(BorderFactory.createTitledBorder("Setups"));
+	    commandPnl.add(pnl,c);
+	    
+	    button = new JButton("disc only!");
+	    c.gridx = 0;
+	    c.gridy = 0;
+	    c.insets = new Insets(1,2,1,2);
+	    pnl.add(button,c);
+//	    
+	    button.addActionListener( new ActionListener() 
+	    {
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				UltimateWithUI ultimateWUI = (UltimateWithUI)con.getSimulation();
+				ultimateWUI.start(ExpermintSetup.Hummel);
+			}
+		});
+	    button = new JButton("Vertical Stack!");
+	    c.gridx = 0;
+	    c.gridy = 1;
+	    c.insets = new Insets(1,2,1,2);
+	    pnl.add(button,c);
+//	    
+	    button.addActionListener( new ActionListener() 
+	    {
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				UltimateWithUI ultimateWUI = (UltimateWithUI)con.getSimulation();
+				ultimateWUI.start(ExpermintSetup.VerticalStack);
+			}
+		});
 	}
 }
 

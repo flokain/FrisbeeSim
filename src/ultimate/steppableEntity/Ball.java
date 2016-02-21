@@ -2,15 +2,9 @@ package ultimate.steppableEntity;
 
 import java.io.IOException;
 
-import disc.physics.aerodynamics.FlightModel_HummelNew;
-import disc.physics.aerodynamics.FlyingDisc;
-import disc.physics.aerodynamics.FlightModel_HummelNew.DeValueContainer;
-import disc.physics.aerodynamics.FlyingDisc.flightCoefficientsType;
 import sim.engine.Steppable;
 import sim.util.Double3D;
 import ultimate.Ultimate;
-import ultimate.UltimateEntity;
-import ultimate.UltimateEntity.AccelerationsContainer;
 
 @SuppressWarnings("serial")
 public class Ball extends Frisbee implements Steppable

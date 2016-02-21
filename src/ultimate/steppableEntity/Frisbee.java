@@ -2,9 +2,10 @@ package ultimate.steppableEntity;
 
 import java.io.IOException;
 
+import disc.physics.aerodynamics.FlightModel;
+import disc.physics.aerodynamics.FlightModel.DeValueContainer;
 import disc.physics.aerodynamics.FlightModel_HummelNew;
 import disc.physics.aerodynamics.FlyingDisc;
-import disc.physics.aerodynamics.FlightModel_HummelNew.DeValueContainer;
 import disc.physics.aerodynamics.FlyingDisc.flightCoefficientsType;
 import sim.engine.Steppable;
 import sim.util.Double3D;
@@ -16,9 +17,17 @@ public class Frisbee extends UltimateEntity implements Steppable
 {
 	//override arrowsFlag
 	
-	private FlightModel_HummelNew flightModel;
+	private FlightModel flightModel;
 	protected boolean isFlying = false;
 
+	Frisbee(Double3D position, Double3D orientation, Double3D velocity,Double3D omega, double mass, double radius, FlightModel flightModel) throws IOException
+	{
+		super(position,orientation,velocity,omega,mass,radius);
+		FlyingDisc physicalModelofDisc = new FlyingDisc(flightCoefficientsType.HUMMEL_SHORT);
+		this.flightModel = flightModel;
+		arrowsFlag = true;
+	}
+	
 	Frisbee(Double3D position, Double3D orientation, Double3D velocity,Double3D omega, double mass, double radius) throws IOException
 	{
 		super(position,orientation,velocity,omega,mass,radius);
@@ -57,4 +66,13 @@ public class Frisbee extends UltimateEntity implements Steppable
 	{
 		return isFlying;
 	}
+
+	public FlightModel getFlightModel() {
+		return flightModel;
+	}
+
+	public void setFlightModel(FlightModel flightModel) {
+		this.flightModel = flightModel;
+	}
+	
 }

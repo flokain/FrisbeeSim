@@ -2,12 +2,16 @@ package disc.physics.aerodynamics;
 
 import java.io.IOException;
 
+import javax.media.j3d.Transform3D;
+
+import com.sun.javafx.geom.Matrix3f;
+
 import disc.physics.Disc;
 import disc.physics.aerodynamics.FlyingDisc.flightCoefficientsType;
 import sim.util.Double3D;
 import sim.util.MutableDouble3D;
 
-public class FlightModel_Kain {
+public class FlightModel_Kain implements FlightModel{
 
 	private final FlyingDisc disc;
 	private final double g;  	//The acceleration of gravity (m/s^2).
@@ -51,9 +55,9 @@ public class FlightModel_Kain {
 			    .mul(inverseInertia)									// -> R*I^1*RT(l) = 
 			    .mul(R.transpose()										// =  R*I^1*RT*R*I*RT*omega = omega;
 			    .mul(l));
-		omegaR = R.cross(omega);    									// omegaR = [ omega x R1,: , omega x R2,: ,omega x R3,:]
-		
+		omegaR = R.cross(omega);    									// omegaR = [ omega x R1,: , omega x R2,: ,omega x R3,:
 		gamma = angle(R.getCol(0),R.getCol(1), v); 						//angle of attack
+		
 		air = RHO*disc.area*v.lengthSq()/2; 							// Airresistance rho*A*v^2
 		
 		if ( gamma == 0)
@@ -86,7 +90,7 @@ public class FlightModel_Kain {
 		                                                                
 		v = p.multiply(1/disc.mass); 							        // p = m*v -> v = p/m
 		
-		return new DeValueContainer(v,omegaR,f,tau);
+		return new DeValueContainer(v,omegaR,tau,f);
 	}
 	public DeValueContainer calculate(DeValueContainer cont) throws IOException
 	{
@@ -142,33 +146,30 @@ public class FlightModel_Kain {
 		tmp.z = a.x*b.y - a.y*b.x;
 		return new Double3D(tmp);
 	}
-
-	@SuppressWarnings("unused")
-	private Double3D project(Double3D s0, Double3D s1, Double3D x)
+	static Double3D project(Double3D s0, Double3D s1, Double3D x)
 	{
 		return project(cross(s0,s1),x); 
 	}
-	private Double3D project(Double3D n, Double3D x)
+	static Double3D project(Double3D n, Double3D x)
 	{
 		n = n.normalize();
 		return x.subtract(n.multiply(x.dot(n))); // p_n(x) = x-n*(x.n)  
 	}
-	
-	private double angle(Double3D s0, Double3D s1, Double3D x)
+	static double angle(Double3D s0, Double3D s1, Double3D x)
 	{
 			Double3D n = cross(s0,s1);
 			double sin = n.dot(x)/ Math.sqrt(( n.dot(n) * x.dot(x)));
-			return Math.asin(sin);
+			return -Math.asin(sin);
 	}
-	
-	private double poly(double x, double[] y)
+	static double poly(double x, double[] y)
 	{
 		double tmp = 0;
 		for (int i = 0; i<y.length ; i++) 
 			tmp = tmp + y[i]* Math.pow(x,(i));
 		return tmp;
 	}
-	public DeValueContainer convertHummelToKainIvp( double[] y)
+	
+public DeValueContainer convertHummelToKainIvp( double[] y)
 	{
 		Double3D r;
 		Matrix R;
@@ -192,8 +193,75 @@ public class FlightModel_Kain {
 		return new DeValueContainer(r,R,l,p);
 
 	}
+	public DeValueContainer convertHummelToKainIvp( 
+			Double3D position, Double3D orientation, Double3D velocity,
+			Double3D omega)
+	{
+		Double3D r;
+		Matrix R;
+		Double3D l;
+		Double3D p;
+		
+		r = position;	//r -> r									
+		p = velocity	// v -> p = v*m
+				.multiply(disc.mass);
+		R = new Matrix().setIdentity()	//an -> R 
+				.rotY(orientation.y)
+				.rotX(orientation.x)
+				.rotZ(orientation.z)
+				.transpose();
+		
+		l = R								// omega -> l = R*I*RT(omega)
+			.mul(new Matrix(disc.inertia_XY, disc.inertia_XY, disc.inertia_Z))
+			.mul(R.transpose())
+			.mul(omega);
+		
+		return new DeValueContainer(r,R,l,p);
 
+	}
 	
+	public disc.physics.aerodynamics.FlightModel.DeValueContainer convertKainToHummelIvp( 
+			Double3D r, Matrix R, Double3D l,
+			Double3D p)
+	{
+		Double3D position;
+		Double3D orientation;
+		Double3D velocity;
+		Double3D omega;
+		
+		position = r;	//r -> r									
+		velocity = p	// v -> p = v*m
+				.multiply(1/disc.mass);
+		
+		double x = Math.atan2(R.get(2, 1),R.get(2,2));
+		double y = Math.atan2(-R.get(2, 0),Math.sqrt( Math.pow(R.get(2,1),2) + Math.pow(R.get(2,2),2)));
+		double z = Math.atan2(R.get(1, 0),R.get(0,0));
+		orientation = new Double3D(x,y,z);
+		omega = R								// omega -> l = R*I*RT(omega)
+			.mul(inverseInertia)
+			.mul(R.transpose())
+			.mul(l);
+		
+		return new disc.physics.aerodynamics.FlightModel.DeValueContainer(position,orientation,velocity,omega);
+
+	}
+
+
+	@Override
+	public disc.physics.aerodynamics.FlightModel.DeValueContainer calculate(
+			Double3D position, Double3D orientationAngles, Double3D velocity,
+			Double3D omega)
+	{
+		DeValueContainer tmp = new DeValueContainer();
+		try {
+			tmp = calculate(convertHummelToKainIvp(position,orientationAngles,velocity,omega));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return convertKainToHummelIvp(tmp.r, tmp.R, tmp.l, tmp.p);
+		
+	}
 }
 
 
