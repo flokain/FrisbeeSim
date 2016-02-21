@@ -373,7 +373,7 @@ public class UltimateWithUI extends GUIState
 	    //setup a Pnl for interaction.
 	    JPanel pnl = new JPanel();
 	    pnl.setLayout(new GridBagLayout());
-	    pnl.setBorder(BorderFactory.createTitledBorder("Interaction"));
+	    pnl.setBorder(BorderFactory.createTitledBorder("567456"));
 
 	    c.gridx = 0;
 	    c.gridy = 0;
