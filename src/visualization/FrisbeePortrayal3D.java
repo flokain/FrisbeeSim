@@ -12,6 +12,8 @@ import java.util.Enumeration;
 
 
 
+
+
 import javax.media.j3d.Appearance;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.ColoringAttributes;
@@ -35,8 +37,8 @@ import sim.portrayal3d.simple.Arrow;
 import sim.portrayal3d.simple.BranchGroupPortrayal3D;
 import sim.portrayal3d.simple.PrimitivePortrayal3D;
 import sim.util.Double3D;
-import Ultimate.Frisbee;
-import Ultimate.UltimateEntity;
+import ultimate.UltimateEntity;
+import ultimate.steppableEntity.Frisbee;
 
 import com.sun.j3d.loaders.IncorrectFormatException;
 import com.sun.j3d.loaders.ParsingErrorException;

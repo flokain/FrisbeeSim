@@ -7,7 +7,7 @@ import sim.portrayal.DrawInfo2D;
 import sim.portrayal.simple.CircledPortrayal2D;
 import sim.portrayal.simple.MovablePortrayal2D;
 import sim.portrayal.simple.OvalPortrayal2D;
-import Ultimate.UltimateEntity;
+import ultimate.UltimateEntity;
 
 public class UltimateEntityPortrayal2D extends MovablePortrayal2D{
 	

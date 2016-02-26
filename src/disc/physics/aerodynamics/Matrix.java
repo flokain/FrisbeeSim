@@ -50,6 +50,14 @@ class Matrix
 		el[i] = new Double3D(y);
 		return this;
 	}
+	public double get(int i, int j){
+		
+		if (j == 0)	return el[i].x;
+		if (j == 1)	return el[i].y;
+		if (j == 2)	return el[i].z;
+		return 0;
+	}
+	
 	public Double3D getCol(int j) 
 	{
 		if (j == 0)	return new Double3D(el[0].x,el[1].x,el[2].x);
