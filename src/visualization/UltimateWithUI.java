@@ -48,6 +48,9 @@ import com.sun.j3d.utils.geometry.Cylinder;
 
 import disc.physics.aerodynamics.FlightModel;
 import disc.physics.aerodynamics.FlightModel_Kain;
+import disc.physics.aerodynamics.FlightModel_HummelNew;
+import disc.physics.aerodynamics.FlightModel_HummelOriginal;
+import disc.physics.aerodynamics.FlightModel_HummelNewCorrected;
 import sim.display.Console;
 import sim.display.Controller;
 import sim.display.Display2D;
@@ -65,6 +68,7 @@ import sim.portrayal3d.grid.quad.TilePortrayal;
 import sim.portrayal3d.simple.BranchGroupPortrayal3D;
 import sim.portrayal3d.simple.ConePortrayal3D;
 import sim.portrayal3d.simple.CubePortrayal3D;
+import sim.portrayal3d.simple.CylinderPortrayal3D;
 import sim.portrayal3d.simple.Shape3DPortrayal3D;
 import sim.util.Bag;
 import sim.util.Double3D;
@@ -74,6 +78,7 @@ import ultimate.Ultimate;
 import ultimate.Ultimate.ExpermintSetup;
 import ultimate.fixedEntity.Line;
 import ultimate.steppableEntity.Frisbee;
+import ultimate.steppableEntity.Player;
 import ultimate.steppableEntity.PlayerDefence;
 import ultimate.steppableEntity.PlayerOffence;
 
@@ -269,14 +274,31 @@ public class UltimateWithUI extends GUIState
 				final Box b = (Box) objects.objs[i];
 				entityPortrayal3D.setPortrayalForObject(objects.objs[i],  new BranchGroupPortrayal3D(new BranchGroup(){{addChild(b);}}));
 			}
-			if(objects.objs[i] instanceof PlayerOffence)
+			if(objects.objs[i] instanceof Player)
 			{
-				entityPortrayal3D.setPortrayalForObject(objects.objs[i],  new UltimateEntityPortrayal3D(new BranchGroup() {{addChild(new Shape3D(new sim.app.crowd3d.GullCG()));}}));
+				Color col;
+				if(objects.objs[i] instanceof PlayerOffence) col = Color.BLUE;
+				else col = Color.RED;
+				
+				Transform3D trans = new Transform3D();
+				trans.rotZ(-Math.PI/2);
+				final TransformGroup t = new TransformGroup(trans);
+					
+				final Appearance app = new Appearance();
+				app.setColoringAttributes(new ColoringAttributes(new Color3f(col) ,ColoringAttributes.NICEST));
+				
+				t.addChild(new Cone(0.3f, (float) 1,app));
+				
+				entityPortrayal3D.setPortrayalForObject(objects.objs[i],  new UltimateEntityPortrayal3D(new BranchGroup() {{addChild(t);}}));
+			}
+			/*if(objects.objs[i] instanceof PlayerOffence)
+			{
+				//entityPortrayal3D.setPortrayalForObject(objects.objs[i],  new UltimateEntityPortrayal3D(new BranchGroup() {{addChild(new Shape3D(new sim.app.crowd3d.GullCG()));}}));
 			}
 			else if(objects.objs[i] instanceof PlayerDefence)
 			{
 				entityPortrayal3D.setPortrayalForObject(objects.objs[i], new UltimateEntityPortrayal3D());
-			}			
+			}	*/		
 			else if(objects.objs[i] instanceof Frisbee)
 			{
 				entityPortrayal3D.setPortrayalForObject(objects.objs[i], new FrisbeePortrayal3D());
@@ -373,13 +395,13 @@ public class UltimateWithUI extends GUIState
 	    //setup a Pnl for interaction.
 	    JPanel pnl = new JPanel();
 	    pnl.setLayout(new GridBagLayout());
-	    pnl.setBorder(BorderFactory.createTitledBorder("567456"));
+	    pnl.setBorder(BorderFactory.createTitledBorder("Flightmodels"));
 
 	    c.gridx = 0;
 	    c.gridy = 0;
 	    commandPnl.add(pnl,c);	    
 	    
-		JButton button = new JButton("Hummel-flight f2302");
+		JButton button = new JButton("Hummel_new");
 	    c.gridx = 0;
 	    c.gridy = 0;
 	    c.insets = new Insets(1,2,1,2);
@@ -390,16 +412,35 @@ public class UltimateWithUI extends GUIState
 			public void actionPerformed(ActionEvent e) 
 			{
 				Ultimate ultimate = (Ultimate)con.getSimulation().state;			
-				
-				Double3D orientation = new Double3D(-7.11E-02, 2.11E-01, 5.03E+00);//rad
-				Double3D velocity = new Double3D(1.34E+01,  -4.11E-01, 1.12E-03);
-				Double3D omega = new Double3D(-1.49E+01, -1.48E+00, 5.43E+01);		
-				
-				ultimate.frisbee.throwDisc(velocity, orientation, omega);
+				try {
+					ultimate.frisbee.setFlightModel(new FlightModel_HummelNew());
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		});
 	    
-	    button = new JButton("Kain-flight f2302");	
+	    button = new JButton("Hummel_NewCorrected");	
+	    c.gridx = 0;
+	    c.gridy = 1;
+		pnl.add(button,c);
+	    button.addActionListener( new ActionListener() 
+	    {
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				Ultimate ultimate = (Ultimate)con.getSimulation().state;
+				try {
+					ultimate.frisbee.setFlightModel(new FlightModel_HummelNewCorrected());
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+	    
+	    button = new JButton("Kain");	
 	    c.gridx = 0;
 	    c.gridy = 1;
 		pnl.add(button,c);
@@ -415,6 +456,69 @@ public class UltimateWithUI extends GUIState
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+			}
+		});
+	    
+	    //setup pnl for throw Setups.
+	    pnl = new JPanel();
+	    pnl.setLayout(new GridBagLayout());
+	    c.gridx = 0;
+	    c.gridy = 1;
+	    commandPnl.add(pnl,c);
+	    pnl.setBorder(BorderFactory.createTitledBorder("Throws"));
+
+	    button = new JButton("Hummel-flight f2302");
+	    c.gridx = 0;
+	    c.gridy = 0;
+	    c.insets = new Insets(1,2,1,2);
+	    pnl.add(button, c);
+	    
+	    button.addActionListener( new ActionListener() 
+	    {
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				Ultimate ultimate = (Ultimate)con.getSimulation().state;			
+				
+				Double3D orientation = new Double3D(-7.11E-02, 2.11E-01, 5.03E+00);//rad
+				Double3D velocity = new Double3D(1.34E+01,  -4.11E-01, 1.12E-03);
+				Double3D omega = new Double3D(-1.49E+01, -1.48E+00, 5.43E+01);		
+				
+				ultimate.frisbee.throwDisc(velocity, orientation, omega);
+			}
+		});
+	    
+	    button = new JButton("Hummel-flight mirrored f2302");
+	    c.gridx = 0;
+	    c.gridy = 1;
+	    c.insets = new Insets(1,2,1,2);
+	    pnl.add(button, c);
+	    
+	    button.addActionListener( new ActionListener() 
+	    {
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				Ultimate ultimate = (Ultimate)con.getSimulation().state;			
+				
+				Double3D orientation = new Double3D(7.11E-02, -2.11E-01, -5.03E+00);//rad
+				Double3D velocity = new Double3D(1.34E+01,  -4.11E-01, 1.12E-03);
+				Double3D omega = new Double3D(1.49E+01, 1.48E+00, -5.43E+01);		
+				
+				ultimate.frisbee.throwDisc(velocity, orientation, omega);
+			}
+		});
+	    
+	    button = new JButton("v = (10,0,10)");	
+	    c.gridx = 0;
+	    c.gridy = 2;
+		pnl.add(button,c);
+	    button.addActionListener( new ActionListener() 
+	    {
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				Ultimate ultimate = (Ultimate)con.getSimulation().state;
 				
 				Double3D orientation = new Double3D(0,0,0);//rad
 				Double3D velocity = new Double3D(10,0,10);

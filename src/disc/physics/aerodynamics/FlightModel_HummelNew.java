@@ -11,9 +11,9 @@ import disc.physics.aerodynamics.FlyingDisc.flightCoefficientsType;
 
 public class FlightModel_HummelNew implements FlightModel{
 	
-	private final FlyingDisc disc;
-	private final double g;  	//The acceleration of gravity (m/s^2).
-	private double RHO; 		//The density of air in kg/m^3.
+	protected final FlyingDisc disc;
+	protected final double g;  	//The acceleration of gravity (m/s^2).
+	protected double RHO; 		//The density of air in kg/m^3.
 	
 	/* Parameters for the calculation
 	 * they only need to be calculated once and are intended to save computation time and

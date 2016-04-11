@@ -100,7 +100,7 @@ public abstract class Player extends UltimateEntity implements Steppable {
 		double K = 10; //v_max
 		Double3D omega = getOmega();
 		super.setAlpha(omega.negate().add(ax.multiply(K)).multiply(1./T)); // x'= 1/(T)*(-x + K*b(t))
-		super.setAlpha(ax.multiply(K));
+		//super.setAlpha(ax.multiply(K));
 	}
 	
 	
@@ -112,7 +112,8 @@ public abstract class Player extends UltimateEntity implements Steppable {
 		// he will then take the positive time and predict to intercept it at this point.
 		timeUntilIntersection = Math.abs(timeUntilIntersection);
 		
-		return en.getPosition().add(distanceVec.multiply(timeUntilIntersection)).subtract(getPosition());
+		return en.getPosition().add(en.getVelocity().multiply(timeUntilIntersection / en.getVelocity().length())).subtract(getPosition());
+		//return en.getPosition().add(distanceVec.multiply(timeUntilIntersection)).subtract(getPosition());
 	}
 
 }
