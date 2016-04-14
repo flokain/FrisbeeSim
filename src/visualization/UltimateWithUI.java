@@ -75,7 +75,7 @@ import sim.util.Double3D;
 import sim.util.gui.SimpleColorMap;
 import ultimate.FixedEntity;
 import ultimate.Ultimate;
-import ultimate.Ultimate.ExpermintSetup;
+import ultimate.Ultimate.ExperimentSetup;
 import ultimate.fixedEntity.Line;
 import ultimate.steppableEntity.Frisbee;
 import ultimate.steppableEntity.Player;
@@ -122,14 +122,14 @@ public class UltimateWithUI extends GUIState
 	public void start()
 	{
 		super.start();
-		initialize(ExpermintSetup.VerticalStack);
+		initialize(ExperimentSetup.VerticalStack);
 	}
-	public void start(ExpermintSetup setup)
+	public void start(ExperimentSetup setup)
 	{
 		super.start();
 		initialize(setup);
 	}
-	public void initialize(ExpermintSetup setup)
+	public void initialize(ExperimentSetup setup)
 	{
 		((Ultimate)state).initialize(setup);
 		// set up our portrayals
@@ -550,7 +550,7 @@ public class UltimateWithUI extends GUIState
 			public void actionPerformed(ActionEvent e) 
 			{
 				UltimateWithUI ultimateWUI = (UltimateWithUI)con.getSimulation();
-				ultimateWUI.start(ExpermintSetup.Hummel);
+				ultimateWUI.start(ExperimentSetup.Hummel);
 			}
 		});
 	    button = new JButton("Vertical Stack!");
@@ -565,7 +565,22 @@ public class UltimateWithUI extends GUIState
 			public void actionPerformed(ActionEvent e) 
 			{
 				UltimateWithUI ultimateWUI = (UltimateWithUI)con.getSimulation();
-				ultimateWUI.start(ExpermintSetup.VerticalStack);
+				ultimateWUI.start(ExperimentSetup.VerticalStack);
+			}
+		});
+	    button = new JButton("Read Experiment");
+	    c.gridx = 0;
+	    c.gridy = 2;
+	    c.insets = new Insets(1,2,1,2);
+	    pnl.add(button,c);
+//	    
+	    button.addActionListener( new ActionListener() 
+	    {
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				UltimateWithUI ultimateWUI = (UltimateWithUI)con.getSimulation();
+				ultimateWUI.start(ExperimentSetup.ReadExperiment);
 			}
 		});
 	}

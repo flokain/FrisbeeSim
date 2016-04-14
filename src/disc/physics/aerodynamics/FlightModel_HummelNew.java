@@ -15,10 +15,10 @@ public class FlightModel_HummelNew implements FlightModel{
 	protected final double g;  	//The acceleration of gravity (m/s^2).
 	protected double RHO; 		//The density of air in kg/m^3.
 	
-	/* Parameters for the calculation
-	 * they only need to be calculated once and are intended to save computation time and
-	 * to make the code more readable.
-	 */
+	// Parameters for the calculation
+	// they only need to be calculated once and are intended to save computation time and
+	// to make the code more readable.
+	
 	Matrix inverseInertia;
 	
 	public FlightModel_HummelNew() throws IOException

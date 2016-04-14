@@ -26,7 +26,7 @@ public class Ultimate extends SimState{
 	double fieldWidth = 37.0; // size of an ultimate field in meters
 	double fieldLength = 100.0; 
 	double endzoneLength = 16.0;
-	double stepTime = 0.0001; // simulated time that elapses between 2 steps (all forces are calculated in m/s^2)
+	double stepTime = 0.001; // simulated time that elapses between 2 steps (all forces are calculated in m/s^2)
 	
 	Bag playerOffence;
 	Bag playerDefence;
@@ -34,9 +34,9 @@ public class Ultimate extends SimState{
 	Bag obstacles;
 	Bag Frisbees;
 	
-	public enum ExpermintSetup 
+	public enum ExperimentSetup 
 	{
-		Flight, Hummel, VerticalStack, Default;
+		Flight, Hummel, VerticalStack, Default, ReadExperiment;
 	}
 	
 	public Frisbee frisbee;
@@ -65,7 +65,7 @@ public class Ultimate extends SimState{
 
 	
 
-	public void initialize(ExpermintSetup setup){
+	public void initialize(ExperimentSetup setup){
 			
 		playerOffence.clear();
 		playerDefence.clear();
@@ -132,6 +132,56 @@ public class Ultimate extends SimState{
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			ultimateField3D.setObjectLocation(frisbee, frisbee.getPosition());
+			schedule.scheduleRepeating(frisbee);
+			break;
+		}
+		case ReadExperiment:
+		{
+			//init field;
+			ultimateField3D = new Continuous3D(0.001, fieldLength, fieldWidth, 40);
+			Bag lines = new Bag();
+			lines.add(new Line(new Double3D(endzoneLength,0,0),new Double3D(endzoneLength,fieldWidth,0))); //endzone left
+			lines.add(new Line(new Double3D(fieldLength - endzoneLength,0,0),new Double3D(fieldLength - endzoneLength,fieldWidth,0))); //endzone right
+			lines.add(new Line(new Double3D(0,0,0),new Double3D(0,fieldWidth,0)));
+			lines.add(new Line(new Double3D(fieldLength,0,0),new Double3D(fieldLength,fieldWidth,0)));
+			lines.add(new Line(new Double3D(0,0,0),new Double3D(fieldLength,0,0)));
+			lines.add(new Line(new Double3D(0,fieldWidth,0),new Double3D(fieldLength,fieldWidth,0)));
+			
+			for ( int i = 0; i <lines.size();i++)
+			{
+				Line line = ((Line)lines.get(i));
+				ultimateField3D.setObjectLocation(line, line.getPosition().add(line.getTop()).multiply(0.5));
+			}
+
+			cones.add(new Cone(new Double3D(0,0,0))); 									//endzone 1 right back 
+			cones.add(new Cone(new Double3D(0,fieldWidth,0)));  						//endzone 1 left back 
+			cones.add(new Cone(new Double3D(endzoneLength,0,0)));						//endzone 1 right front
+			cones.add(new Cone(new Double3D(endzoneLength,fieldWidth,0)));				//endzone 1 left front
+			cones.add(new Cone(new Double3D(fieldLength,fieldWidth,0))); 				//endzone 2 right back 
+			cones.add(new Cone(new Double3D(fieldLength,0,0)));  						//endzone 2 left back 
+			cones.add(new Cone(new Double3D(fieldLength-endzoneLength,fieldWidth,0)));	//endzone 2 right front
+			cones.add(new Cone(new Double3D(fieldLength-endzoneLength,0,0)));			//endzone 2 left front
+			
+			for ( int i = 0; i <cones.size();i++)
+			{
+				Cone cone = ((Cone)cones.get(i));
+				ultimateField3D.setObjectLocation(cone, cone.getPosition().add(cone.getTop()).multiply(0.5));
+			}
+			
+			//create objects, attach them to field, and to schedule
+			for (int i = 0; i < 1; i++)
+			{
+				PlayerOffence pO = new PlayerOffence( new Double3D((endzoneLength+(fieldLength-endzoneLength)/7 ), fieldWidth/2,0));
+				PlayerDefence pD = new PlayerDefence( new Double3D((endzoneLength+(fieldLength-endzoneLength)/7 ), fieldWidth/2,0));
+				playerOffence.add(pO);
+				playerDefence.add(pD);
+				ultimateField3D.setObjectLocation(pO,pO.getPosition());
+				schedule.scheduleRepeating(pO);
+				ultimateField3D.setObjectLocation(pD,pD.getPosition());
+				schedule.scheduleRepeating(pD);
+			}
+			frisbee.position.setTo( new Double3D(endzoneLength,fieldWidth/2,0).add(new Double3D(1,1,1)));
 			ultimateField3D.setObjectLocation(frisbee, frisbee.getPosition());
 			schedule.scheduleRepeating(frisbee);
 			break;
