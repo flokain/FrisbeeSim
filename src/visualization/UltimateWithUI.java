@@ -401,7 +401,7 @@ public class UltimateWithUI extends GUIState
 	    c.gridy = 0;
 	    commandPnl.add(pnl,c);	    
 	    
-		JButton button = new JButton("Hummel_new");
+		JButton button = new JButton("Hummel");
 	    c.gridx = 0;
 	    c.gridy = 0;
 	    c.insets = new Insets(1,2,1,2);
@@ -421,7 +421,7 @@ public class UltimateWithUI extends GUIState
 			}
 		});
 	    
-	    button = new JButton("Hummel_NewCorrected");	
+	    button = new JButton("Hummel_Corrected");	
 	    c.gridx = 0;
 	    c.gridy = 1;
 		pnl.add(button,c);
@@ -442,7 +442,7 @@ public class UltimateWithUI extends GUIState
 	    
 	    button = new JButton("Kain");	
 	    c.gridx = 0;
-	    c.gridy = 1;
+	    c.gridy = 2;
 		pnl.add(button,c);
 	    button.addActionListener( new ActionListener() 
 	    {
@@ -462,11 +462,16 @@ public class UltimateWithUI extends GUIState
 	    //setup pnl for throw Setups.
 	    pnl = new JPanel();
 	    pnl.setLayout(new GridBagLayout());
+	    pnl.setBorder(BorderFactory.createTitledBorder("Throws"));
+
+	    c.weightx = 0.5;
+	    c.weighty = 0.5;
+	    c.anchor = GridBagConstraints.NORTH;
+	    c.fill = GridBagConstraints.HORIZONTAL;
 	    c.gridx = 0;
 	    c.gridy = 1;
 	    commandPnl.add(pnl,c);
-	    pnl.setBorder(BorderFactory.createTitledBorder("Throws"));
-
+	    
 	    button = new JButton("Hummel-flight f2302");
 	    c.gridx = 0;
 	    c.gridy = 0;

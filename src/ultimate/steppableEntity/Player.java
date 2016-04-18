@@ -8,7 +8,6 @@ import sim.util.Double3D;
 import sim.util.MutableDouble2D;
 import ultimate.Ultimate;
 import ultimate.UltimateEntity;
-import ultimate.UltimateEntity.AccelerationsContainer;
 
 public abstract class Player extends UltimateEntity implements Steppable {
 
@@ -17,7 +16,7 @@ public abstract class Player extends UltimateEntity implements Steppable {
 	double armPower;	// maximum amount of energy applied per second to throw. (max accelaration)
 	public MutableDouble2D tempVector = new MutableDouble2D();
 	
-	public Player( Double3D posi)
+	public Player(Double3D posi)
 	{
 		super(posi,0.5);
 	}
@@ -60,10 +59,10 @@ public abstract class Player extends UltimateEntity implements Steppable {
 	{
 		//assume that orientation always wants to point the local (1,0,0) in to the direction of accel.
 		// it means that the player wants to look at the direction he is running. 
-		// mach einen koordinaten wechsel bezüglich orientation für acceleration auf a.
-		// berechne die angestrebte lokale Drehachse  o1 x a. sie hat die länge sin(alpha)
-		// die stärkste rotation soll stattfinden wenn der winkel zwischen o1, a pi beträgt.
-		// deshalb berechnen wir die länge der achse als (-cos(winkel)+1)/2 = (- o1 . a + 1)/2
+		// mach einen koordinaten wechsel bezueglich orientation fuer acceleration auf a.
+		// berechne die angestrebte lokale Drehachse  o1 x a. sie hat die laenge sin(alpha)
+		// die staerkste rotation soll stattfinden wenn der winkel zwischen o1, a pi betraegt.
+		// deshalb berechnen wir die laenge der achse als (-cos(winkel)+1)/2 = (- o1 . a + 1)/2
 		// diese ist bei winkel = 0 ebenfalls null und bei pi maximal und gleich 1.
 		
 		Vector3d a = new Vector3d(velocity.x,velocity.y,velocity.z);
@@ -78,16 +77,16 @@ public abstract class Player extends UltimateEntity implements Steppable {
 		
 		realToBodyTrans.transform(a);
 
-		// berechne die angestrebte lokale Drehachse  o1 x a. sie hat die länge sin(alpha)
+		// berechne die angestrebte lokale Drehachse  o1 x a. sie hat die laenge sin(alpha)
 		// das ist aber nicht praktisch weil wir dadurch nur den spitzen winkel der aufgespannten
-		//geraden bekommen. Für Abhilfe sorgt dann der nächste schritt.
+		//geraden bekommen. Fuer Abhilfe sorgt dann der naechste schritt.
 		
 		Vector3d axis = new Vector3d();
 		axis.cross(o1,a);
 		axis.normalize();
 		
-		// die stärkste rotation soll stattfinden wenn der winkel zwischen o1 und a pi ist.
-		// deshalb berechnen wir die länge der achse als (-cos(winkel)+1)/2 = (- o1 . a + 1)/2
+		// die staerkste rotation soll stattfinden wenn der winkel zwischen o1 und a pi ist.
+		// deshalb berechnen wir die laenge der achse als (-cos(winkel)+1)/2 = (- o1 . a + 1)/2
 		// diese ist bei winkel = 0 ebenfalls null und bei pi maximal und gleich 1.
 		// double scale = (-o1.dot(a) +1)/2
 		Vector3d o2 = new Vector3d();

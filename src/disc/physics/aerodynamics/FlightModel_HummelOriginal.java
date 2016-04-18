@@ -43,11 +43,10 @@ public class FlightModel_HummelOriginal{
 		CMq = -0.005;
 		CRp = -0.0055;
 		CNr = 0.0000071;
-		/* long flights:
-		CMq = -0.0144; 
-		CRp = -0.0125;
-		CNr = -0.0000341;
-		*/
+		//long flights:
+		//CMq = -0.0144; 
+		//CRp = -0.0125;
+		//CNr = -0.0000341;
 		Ixy = 0.001219;
 		Iz = 0.002352;
 	}
