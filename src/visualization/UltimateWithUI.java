@@ -78,6 +78,7 @@ import ultimate.Ultimate;
 import ultimate.Ultimate.ExperimentSetup;
 import ultimate.fixedEntity.Line;
 import ultimate.steppableEntity.Frisbee;
+import ultimate.steppableEntity.Ball;
 import ultimate.steppableEntity.Player;
 import ultimate.steppableEntity.PlayerDefence;
 import ultimate.steppableEntity.PlayerOffence;
@@ -155,9 +156,7 @@ public class UltimateWithUI extends GUIState
 	public void init(Controller c)
 	{
 		super.init(c);
-		
-		
-		
+
 		// Make the Display2D
 		double scale = 1;
 		display2D = new Display2D(100*scale,37*scale,this);
@@ -452,6 +451,25 @@ public class UltimateWithUI extends GUIState
 				Ultimate ultimate = (Ultimate)con.getSimulation().state;
 				try {
 					ultimate.frisbee.setFlightModel(new FlightModel_Kain());
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+	    
+	    button = new JButton("Ball");	
+	    c.gridx = 0;
+	    c.gridy = 3;
+		pnl.add(button,c);
+	    button.addActionListener( new ActionListener() 
+	    {
+			@Override
+			public void actionPerformed(ActionEvent e) 
+			{
+				Ultimate ultimate = (Ultimate)con.getSimulation().state;
+				try {
+					ultimate.frisbee = new Ball();
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

@@ -52,7 +52,7 @@ public abstract class Player extends UltimateEntity implements Steppable {
 		double T = 1; //time that would pass until reach of velocity_max if there was no drag by -x.
 		double K = 10; //v_max
 		Double3D velocity = getVelocity();
-		super.setAcceleration(velocity.negate().add(dir.multiply(K)).multiply(1./T)); // x'= 1/(T)*(-x + K*b(t))
+		super.setAcceleration(velocity.negate().add(dir.multiply(K)).multiply(1./(3*T))); // x'= 1/(T)*(-x + K*b(t))
 	}
 	
 	public void setAlpha()
@@ -98,10 +98,9 @@ public abstract class Player extends UltimateEntity implements Steppable {
 		double T = 0.01; //time that would pass until reach of velocity_max if there was no drag by -x.
 		double K = 10; //v_max
 		Double3D omega = getOmega();
-		super.setAlpha(omega.negate().add(ax.multiply(K)).multiply(1./T)); // x'= 1/(T)*(-x + K*b(t))
+		super.setAlpha(omega.negate().add(ax.multiply(K)).multiply(1./(3*T))); // x'= 1/(T)*(-x + K*b(t))
 		//super.setAlpha(ax.multiply(K));
 	}
-	
 	
 	protected Double3D getContactPointDirection(UltimateEntity en)
 	{

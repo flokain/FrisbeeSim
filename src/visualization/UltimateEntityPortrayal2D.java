@@ -22,7 +22,7 @@ public class UltimateEntityPortrayal2D extends MovablePortrayal2D{
 					  public void draw(Object object, Graphics2D graphics,DrawInfo2D info) 
 					  {
 						  UltimateEntity ent = (UltimateEntity)object;
-						  scale = ent.getRadius();
+						  scale = ent.getRadius()*3;
 						  paint = colorFill;
 						  super.draw(object, graphics, info);
 					  }

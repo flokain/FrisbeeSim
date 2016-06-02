@@ -24,7 +24,7 @@ public class Ball extends Frisbee implements Steppable
 			omega.multiplyIn(-0.99);
 			
 		}
-		acceleration.setTo(getVelocity().negate().resize(velocity.lengthSq()).multiply(Math.pow(radius,2)*Math.PI * 0.5).subtract(new Double3D(0,0,10))); // air friction on a ball
+		acceleration.setTo(getVelocity().negate().resize(velocity.lengthSq()).multiply(Math.pow(radius,2)*Math.PI * 1.23).subtract(new Double3D(0,0,1.3))); // air friction on a ball
 		alpha.setTo(getOmega().negate().multiply(0.8));
 		return new AccelerationsContainer(new Double3D(acceleration),new Double3D(alpha));
 	}
